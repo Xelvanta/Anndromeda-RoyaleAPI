@@ -1,0 +1,11 @@
+# Ignore everything by default
+*
+
+# Do not ignore the .gitignore file itself
+!.gitignore
+
+# Include specific files
+!app.py
+!traderie_scraper.js
+!README.md
+!LICENSE
