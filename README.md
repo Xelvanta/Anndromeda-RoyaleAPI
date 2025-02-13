@@ -126,8 +126,6 @@ pip install quart quart-cors
 
 If successful, this indicates that the JavaScript side of things is working.
 
-**Important:** If you run the script with `headless: false` (which is the default setting), you will also see **Google Chrome open** as Puppeteer runs the browser in non-headless mode for troubleshooting. You’ll see the browser scraping the Traderie website in real-time. **Make sure you have Google Chrome installed** for Puppeteer to function correctly.
-
 ---
 
 ## Common Issues
@@ -241,9 +239,7 @@ To run the Quart app:
     http://127.0.0.1:5000/items
     ```
 
-This will start the Quart server.
-
-4. If you run the script with `headless: false` (which is the default setting), you will also see **Google Chrome open** as Puppeteer runs the browser in non-headless mode for troubleshooting. You’ll see the browser scraping the Traderie website in real-time. **Make sure you have Google Chrome installed** for Puppeteer to function correctly. The program's progess, such as the number of items found on each page, will also be printed in the terminal.
+This will start the Quart server and start scraping all pages starting from 0.
 
 ---
 
