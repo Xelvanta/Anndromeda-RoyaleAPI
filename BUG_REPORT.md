@@ -117,6 +117,7 @@ The resulting **Python trace logs** (`python_trace.log`, `traceback.log`) and me
 
 ### 4️⃣ Provide System Information  
 - **OS and version** (e.g., Windows 11 24H2, macOS Sonoma, Ubuntu 22.04)  
+- **Software version numbers** (e.g., Node.js 18.3.0, Python 3.11.2, etc.)
 - **Hardware specs** (CPU, RAM, GPU if applicable)  
 - **Type of terminal used** (PowerShell, Command Prompt, Bash, Zsh, etc.)  
 
