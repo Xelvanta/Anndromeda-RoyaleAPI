@@ -111,6 +111,8 @@ If you're running a **Python application (including Quart)** and need a runtime 
 
 The resulting **Python trace logs** (`python_trace.log`, `traceback.log`) and memory dumps (`python_runtime_dump`) will help analyze runtime issues.
 
+📌 **Note:** Only share memory dumps publicly if it's safe to do so.
+
 ---
 
 ### 4️⃣ Provide System Information  
