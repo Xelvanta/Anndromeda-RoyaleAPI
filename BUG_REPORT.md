@@ -12,7 +12,7 @@ Thank you for taking the time to report a bug! Please follow this template to en
 
 ## 📷 Screenshots or Logs (if applicable)  
 - Attach screenshots, error logs, or GIFs to show the issue.  
-- If applicable, copy and paste terminal output (including your input and output).  
+- If applicable, copy and paste terminal output (including your input at the command line).  
 
 ## 🔎 Debugging Instructions  
 To help us debug effectively, please perform the following:  
