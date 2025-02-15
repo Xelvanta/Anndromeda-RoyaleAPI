@@ -22,7 +22,8 @@ We welcome your suggestions! Please use this template to submit a feature reques
 ### 🚀 Feature Description  
 *What does the feature do? Why is it useful?*  
 - Clearly explain the feature's purpose.  
-- Include any potential benefits for users and developers.  
+- Include any potential benefits for users and developers.
+- The problem it solves.
 
 ---
 
@@ -59,7 +60,7 @@ We welcome your suggestions! Please use this template to submit a feature reques
 ---
 
 ## 📋 Next Steps
-- If you would like to contribute this feature yourself, please see our **[Contributing Guide](CONTRIBUTING.md)**.
+- If you would like to contribute this feature yourself, please see our **CONTRIBUTING.md** file.
 - Otherwise, we’ll review your request and consider it for future development!
 
 ---
