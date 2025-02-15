@@ -17,3 +17,12 @@ Thumbs.db
 # Build files
 /dist
 /build
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Python virtual environments
+venv/
+env/
