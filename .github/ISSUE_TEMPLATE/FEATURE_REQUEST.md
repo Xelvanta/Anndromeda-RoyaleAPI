@@ -1,3 +1,11 @@
+---
+name: Feature Request
+about: Create a feature request to help us improve the program.
+title: '📝 [FEATURE]:'
+labels: 'feature'
+assignees: 'Anndromeda'
+---
+
 # Feature Request  
 
 We welcome your suggestions! Please use this template to submit a feature request, so we can understand it clearly and consider how it fits with the project.
