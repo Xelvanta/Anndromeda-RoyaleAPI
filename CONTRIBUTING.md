@@ -26,7 +26,7 @@ git checkout -b feature/your-feature-name
 ### 4️⃣ Make Your Changes  
 Modify the codebase, fix bugs, or improve documentation as needed.  
 
-### 5️⃣ Format Your Code  
+### 5️⃣ Format Your Code (Style Guidelines)
 
 Ensure your code follows the project's formatting and style conventions before committing.  
 
@@ -52,7 +52,8 @@ Ensure your code follows the project's formatting and style conventions before c
 - Avoid **hardcoding paths**, use `os.path.join()` when working with files.  
 
 #### 🚀 JavaScript Formatting  
-- Use **4 spaces for indentation** (no tabs).  
+- Use **4 spaces for indentation** (no tabs)
+  - if you're using Prettier, make sure your settings reflect this.  
 - Follow **ES6+ best practices**:  
   - Use `const` and `let` instead of `var`.  
   - Use arrow functions (`()=>{}`) where applicable.  
