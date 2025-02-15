@@ -104,7 +104,7 @@ This will install **Puppeteer** and related modules, which are required for your
 Install the necessary Python dependencies:
 
 ```bash
-pip install quart quart-cors
+pip install -r requirements.txt
 ```
 
 ---
