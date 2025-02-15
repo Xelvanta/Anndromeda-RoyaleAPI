@@ -3,7 +3,7 @@ name: Bug Report
 about: Create a bug report to help us resolve the bug.
 title: '🐞 [BUG]:'
 labels: 'bug'
-assignees: 'Anndromeda'
+assignees: 'Xelvanta'
 ---
 
 # Bug Report  
