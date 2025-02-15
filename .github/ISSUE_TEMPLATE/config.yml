@@ -1,4 +1,0 @@
-issue_templates:
-  - name: "Bug Report"
-    description: "Report a bug or issue with the project"
-    filename: "BUG_REPORT.md"
