@@ -1,1 +1,4 @@
-default: BUG_REPORT.md
+issue_templates:
+  - name: "Bug Report"
+    about: "Report a bug or issue with the project"
+    filename: "BUG_REPORT.md"
