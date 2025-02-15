@@ -1,6 +1,6 @@
 {
   "name": "Anndromeda-RoyaleAPI",
-  "version": "5.0.1-alpha",
+  "version": "5.*.*-alpha",
   "description": "**Anndromeda RoyaleAPI** (formerly known as Royale High API) is a powerful **Quart API** designed to fetch the names of items from the popular Roblox game **Royale High** and their associated community values from **Traderie**. The API returns results in **JSON format**, making it easy to integrate and use for various applications or analysis.",
   "main": "traderie_scraper.js",
   "scripts": {
