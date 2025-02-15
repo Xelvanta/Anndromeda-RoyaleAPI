@@ -1,3 +1,11 @@
+---
+name: Bug Report
+about: Create a bug report to help us resolve the bug.
+title: '🐞 [BUG]:'
+labels: 'bug'
+assignees: 'Anndromeda'
+---
+
 # Bug Report  
 
 Thank you for taking the time to report a bug! Please follow this template to ensure we can effectively troubleshoot and resolve the issue.  
