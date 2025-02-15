@@ -102,7 +102,7 @@ git push origin feature/your-feature-name
 
 ## 🔥 Bug Reports  
 
-If you find a bug, please check the **BUG_REPORT.md** file for details on how to submit a detailed bug report.  
+When creating a **GitHub issue**, you'll have the option to select the '**Bug Report**' template. Click on that to view instructions on submitting a detailed bug report.
 
 When reporting a bug, include:  
 - Steps to reproduce the issue  
@@ -114,7 +114,9 @@ When reporting a bug, include:
 
 ## 🎯 Feature Requests  
 
-Want to suggest a feature? Create a **GitHub Issue** with:  
+When creating a **GitHub issue**, you'll have the option to select the '**Feature Request**' template. Click on that to view instructions on submitting a detailed feature request.
+
+When requesting a feature, include:  
 - **A detailed description** of the feature  
 - **The problem it solves**  
 - **Any alternatives you've considered**  
@@ -123,7 +125,7 @@ Want to suggest a feature? Create a **GitHub Issue** with:
 
 ## ✅ Code of Conduct  
 
-Be respectful and constructive.
+For a detailed guide on fostering a respectful, inclusive, and welcoming environment, please refer to the **CODE_OF_CONDUCT.md** file. It follows the **Contributor Covenant**, which outlines our community standards and expectations for behavior.
 
 ---
 
