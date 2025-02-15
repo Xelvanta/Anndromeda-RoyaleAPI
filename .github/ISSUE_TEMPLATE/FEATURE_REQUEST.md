@@ -2,7 +2,7 @@
 name: Feature Request
 about: Create a feature request to help us improve the program.
 title: '📝 [FEATURE]:'
-labels: 'feature'
+labels: 'enhancement'
 assignees: 'Anndromeda'
 ---
 
