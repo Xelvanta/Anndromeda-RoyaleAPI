@@ -2,7 +2,7 @@ import json
 import subprocess
 import os
 
-from quart import Quart, jsonify
+from quart import Quart, jsonify, request
 from quart_cors import cors
 
 app = Quart(__name__)
@@ -25,11 +25,11 @@ async def scrape_traderie(page_num):
 
         try:
             stdout_decoded = stdout.decode()
-            json_start = stdout_decoded.find("[{")  # Find start of JSON
-            json_end = stdout_decoded.rfind("}]") + 2  # Find end of JSON
-            json_data = stdout_decoded[json_start:json_end]  # Extract JSON part
+            json_start = stdout_decoded.find("[{")  
+            json_end = stdout_decoded.rfind("}]") + 2  
+            json_data = stdout_decoded[json_start:json_end]  
 
-            items = json.loads(json_data)  # Load only the JSON
+            items = json.loads(json_data)  
             if not items:
                 print(f"⚠️ No items found on page {page_num}.")
                 return True, []
@@ -47,6 +47,7 @@ async def scrape_traderie(page_num):
 
 @app.route('/items', methods=['GET'])
 async def get_items():
+    """Fetch all items."""
     all_items = []
     page_number = 0
 
@@ -58,6 +59,41 @@ async def get_items():
         page_number += 1
 
     return jsonify(all_items)
+
+@app.route('/item', methods=['GET'])
+async def get_item_value():
+    """Fetch the value of a specific item based on the query parameter."""
+    item_name = request.args.get("name")  # Get item name from query params
+
+    # If no 'name' query parameter, return all items
+    if not item_name:
+        all_items = []
+        page_number = 0
+
+        while page_number < 100:
+            scrape_done, new_items = await scrape_traderie(page_number)
+            if scrape_done or not new_items:
+                break
+            all_items.extend(new_items)
+            page_number += 1
+
+        return jsonify(all_items)  # Return all items if no 'name' query parameter
+
+    # If 'name' is provided, return the value of the specific item
+    page_number = 0
+    while page_number < 100:
+        scrape_done, new_items = await scrape_traderie(page_number)
+        if scrape_done or not new_items:
+            break
+
+        # Search for the item in the current page
+        for item in new_items:
+            if item.get("name") == item_name:
+                return jsonify({"value": item.get("value")})  # Return value immediately
+
+        page_number += 1
+
+    return jsonify({"error": "Item not found"}), 404  # If no match found in all pages
 
 if __name__ == '__main__':
     app.run(debug=True)
