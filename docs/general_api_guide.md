@@ -1,4 +1,6 @@
-# 📌 Anndromeda RoyaleAPI | General API Guide   
+# 🚀 Anndromeda RoyaleAPI | General API Guide   
+
+📌 Note: When you enter a URL into your browser’s address bar, a **GET request** is automatically triggered. This is the default HTTP method used by browsers to retrieve data from a server. You do not need to specify the GET method explicitly in the browser; it is handled automatically.
 
 ## **Base URL**  
 ```
