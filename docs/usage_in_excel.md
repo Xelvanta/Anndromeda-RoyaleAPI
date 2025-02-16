@@ -20,6 +20,12 @@ quart run
 http://127.0.0.1:5000/items
 ```
 
+or add a parameter:
+
+```text
+http://127.0.0.1:5000/items?name=<ITEM_NAME>
+```
+
 Click **OK** to proceed. You will see the program start scraping data in the terminal.
 
 ### 4️⃣ **Opening the Advanced Editor in Power Query**  
