@@ -70,6 +70,8 @@ in
 - Click the expand icon (the small icon with two arrows) next to the `List` column to proceed with this transformation.
 - This is just one approach for loading and transforming your data!
 
+📌 Note: See the **usage_in_excel.xlsx** file to see an example of how to use the API to fetch a specific item's value (Recommended to view).
+
 ### 6️⃣ **Loading the Data into Excel**  
 - After you’re happy with the data, load it into Excel by clicking **Close & Load**. This will populate the table with the transformed data.
 
