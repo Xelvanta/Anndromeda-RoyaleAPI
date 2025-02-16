@@ -18,7 +18,14 @@ quart run
 
 ```text
 http://127.0.0.1:5000/items
-```  
+```
+
+or add a parameter:
+
+eg.
+```text
+http://127.0.0.1:5000/items?name=<ITEM_NAME>
+```
 
 - Click **Send** to execute the request. The terminal should show that the program is scraping data.  
 
