@@ -51,7 +51,7 @@ async def get_items():
     all_items = []
     page_number = 0
 
-    while page_number < 100:
+    while True:  # Infinite loop until we get no items
         scrape_done, new_items = await scrape_traderie(page_number)
         if scrape_done or not new_items:
             break
@@ -70,7 +70,7 @@ async def get_item_value():
         all_items = []
         page_number = 0
 
-        while page_number < 100:
+        while True:  # Infinite loop until we get no items
             scrape_done, new_items = await scrape_traderie(page_number)
             if scrape_done or not new_items:
                 break
@@ -81,7 +81,7 @@ async def get_item_value():
 
     # If 'name' is provided, return the value of the specific item
     page_number = 0
-    while page_number < 100:
+    while True:  # Infinite loop until we get no items
         scrape_done, new_items = await scrape_traderie(page_number)
         if scrape_done or not new_items:
             break
