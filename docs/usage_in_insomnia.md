@@ -20,6 +20,13 @@ quart run
 http://127.0.0.1:5000/items
 ```
 
+or add a parameter:
+
+eg.
+```text
+http://127.0.0.1:5000/items?name=<ITEM_NAME>
+```
+
 - Click **Send** to initiate the request. You will see the program start scraping data in the terminal.
 
 ### 4️⃣ **View the Response**  
