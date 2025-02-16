@@ -241,6 +241,8 @@ To run the Quart app:
 
 This will start the Quart server and start scraping all pages starting from 0.
 
+📌 **IMPORTANT: See docs/general_api_guide.md for more information.**
+
 ---
 
 ## Contributing
