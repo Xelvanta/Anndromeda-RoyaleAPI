@@ -1,4 +1,4 @@
-# Anndromeda RoyaleAPI
+# 🚀 Anndromeda RoyaleAPI
 
 **Anndromeda RoyaleAPI** (formerly known as Royale High API) is a powerful **Quart API** designed to fetch the names of items from the popular Roblox game **Royale High** and their associated community values from **Traderie**. The API returns results in **JSON format**, making it easy to integrate and use for various applications or analysis.
 
@@ -12,13 +12,13 @@ This API was created to interact with the **Traderie** website, a platform where
 
 ---
 
-## Testing Environment
+## 🧪 Testing Environment
 
 The application has been **tested on Windows 11** but should be compatible with **Linux** and **macOS** systems as well. While it has been primarily tested in a Windows environment, the code should work across these platforms with minor adjustments (if any). For optimal results, it’s recommended to use a system with **Python 3.x** and **Node.js** installed.
 
 ---
 
-## Requirements
+## 📋 Requirements
 
 Before running the application, you’ll need the following:
 
@@ -38,7 +38,7 @@ We'll install these dependencies later during installation:
 
 ---
 
-## Installation
+## ⚙️ Installation
 
 ### 1. Clone the Repository:
 
@@ -128,17 +128,47 @@ If successful, this indicates that the JavaScript side of things is working.
 
 ---
 
-## Common Issues
+## ▶️ Running the Application
 
-Here are some common issues you may encounter during setup:
+To run the Quart app:
 
-- **Node.js not recognized**: Ensure Node.js is installed and properly added to your system's PATH. If you encounter this issue, the instructions to fix it are covered in the **Troubleshooting** section at the bottom.
-- **Puppeteer not working**: Make sure you have **Google Chrome** installed on your system, as Puppeteer requires it to run.
-- **Missing Python dependencies**: Ensure you have installed `quart` and `quart-cors` using `pip install quart quart-cors`.
+1. Open a terminal and navigate to the directory where your app resides.
+
+    ```bash
+    cd Anndromeda-RoyaleAPI
+    ```
+
+2. Run the following:
+
+    ```bash
+    quart run
+    ```
+    
+3. **Access the API**:
+
+    Open any browser or an API client (like Insomnia) and navigate to:
+
+    ```
+    http://127.0.0.1:5000/items
+    ```
+
+This will start the Quart server and start scraping all pages starting from 0.
+
+📌 **IMPORTANT: See [docs/general_api_guide.md](docs/general_api_guide.md) for more information.**
 
 ---
 
-## Troubleshooting
+## ⚠️ Common Issues
+
+Here are some common issues you may encounter during setup:
+
+- **Node.js not recognized**: Ensure Node.js is installed and properly added to your system's PATH. If you encounter this issue, the instructions to fix it are covered in the **Troubleshooting** section.
+- **Puppeteer not working**: Make sure you have **Google Chrome** installed on your system, as Puppeteer requires it to run.
+- **Missing Python dependencies**: Ensure you have installed `quart` and `quart-cors` using `pip install -r requirements.txt`.
+
+---
+
+## 🛠️ Troubleshooting
 
 If you encounter issues, follow the troubleshooting steps below:
 
@@ -215,49 +245,19 @@ This should work now! 🎉
 
 ---
 
-## Running the Application
+## 💡 Contributing
 
-To run the Quart app:
-
-1. Open a terminal and navigate to the directory where your app resides.
-
-    ```bash
-    cd Anndromeda-RoyaleAPI
-    ```
-
-2. Run the following:
-
-    ```bash
-    quart run
-    ```
-    
-3. **Access the API**:
-
-    Open any browser or an API client (like Insomnia) and navigate to:
-
-    ```
-    http://127.0.0.1:5000/items
-    ```
-
-This will start the Quart server and start scraping all pages starting from 0.
-
-📌 **IMPORTANT: See docs/general_api_guide.md for more information.**
+Feel free to fork the project and submit a pull request to help improve **Anndromeda RoyaleAPI**. Your contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
 ---
 
-## Contributing
+## 📝 License
 
-Feel free to fork the project and submit a pull request to help improve **Anndromeda RoyaleAPI**. Your contributions are welcome!
-
----
-
-## License
-
-**Anndromeda RoyaleAPI** is open source and available under the GPL-3.0 license. See the LICENSE file for more details.
+**Anndromeda RoyaleAPI** is open source and available under the GPL-3.0 license. See the [LICENSE](LICENSE) for more details.
 
 ---
 
-By **Anndromeda**
+By **Anndromeda**  
 A sister company to **Xelvanta Group Systems**  
 For support or inquiries, please contact us at [enquiry.information@proton.me](mailto:enquiry.information@proton.me).  
 GitHub: [https://github.com/Xelvanta](https://github.com/Xelvanta)
