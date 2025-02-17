@@ -1,6 +1,9 @@
 # 🚀 Anndromeda RoyaleAPI
 
-![Static Badge](https://img.shields.io/badge/License-GPL--3.0_License-orange) 
+![GitHub License](https://img.shields.io/github/license/Xelvanta/Anndromeda-RoyaleAPI?label=License&color=orange)
+![GitHub package.json prod dependency version](https://img.shields.io/github/package-json/dependency-version/Xelvanta/Anndromeda-RoyaleAPI/puppeteer?label=Puppeteer)
+![GitHub Release](https://img.shields.io/github/v/release/Xelvanta/Anndromeda-RoyaleAPI?include_prereleases&label=Release&color=green)
+
 
 **Anndromeda RoyaleAPI** (formerly known as Royale High API) is a powerful **Quart API** designed to fetch the names of items from the popular Roblox game **Royale High** and their associated community values from **Traderie**. The API returns results in **JSON format**, making it easy to integrate and use for various applications or analysis.
 
