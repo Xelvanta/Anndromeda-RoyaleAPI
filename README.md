@@ -5,15 +5,23 @@
 ![GitHub Release](https://img.shields.io/github/v/release/Xelvanta/Anndromeda-RoyaleAPI?include_prereleases&label=Release&color=green)
 
 
-**Anndromeda RoyaleAPI** (formerly known as Royale High API) is a powerful **Quart API** designed to fetch the names of items from the popular Roblox game **Royale High** and their associated community values from **Traderie**. The API returns results in **JSON format**, making it easy to integrate and use for various applications or analysis.
+**Anndromeda RoyaleAPI** is a powerful **Quart + Puppeteer API** designed to fetch the names of items from the popular Roblox game **Royale High** and their associated community values from **Traderie**. The API returns results in **JSON format**, making it easy to integrate and use for various applications or analysis.
 
 This API was created to interact with the **Traderie** website, a platform where the Royale High community buys and sells in-game items. With the API, you can easily access the most up-to-date information on item names and their community values, providing the necessary data for further processing or for custom interfaces.
 
 ### Key Features:
 
-- **Item Fetching**: The API allows you to retrieve a list of Royale High items and their respective community prices directly from Traderie, providing real-time data for developers, analysts, or any users interested in tracking item trends.
-  
-- **JSON Output**: The API returns data in **JSON format**, which is easily handled programmatically in most languages or environments, ensuring flexibility for diverse use cases.
+- **Item Fetching**: Retrieve a list of Royale High items and their respective community prices directly from Traderie, providing real-time data for developers, analysts, and users tracking item trends. The API supports fetching the values of specific items using query parameters for more targeted searches.  
+
+- **Program Integration**: Seamlessly integrate API responses into various programs like Excel, Google Sheets, and other data processing tools, enabling real-time data retrieval, analysis, and automation without manual entry.
+
+- **JSON Output**: Returns data in **JSON format**, making it easy to parse and manipulate in various programming environments, including Python, JavaScript, and Power Query.  
+
+- **Bulk Data Retrieval**: Supports fetching full lists of items at once, reducing the number of API calls needed and optimizing performance for large-scale data analysis.  
+
+- **Automated Data Analysis**: Easily integrate with data visualization tools like Power BI or Google Sheets, enabling dynamic price tracking and trend analysis.  
+
+- **Stealth Web Scraping**: Utilizes **Puppeteer with stealth mode** to bypass anti-bot detection, ensuring uninterrupted access to real-time item data.  
 
 ---
 
