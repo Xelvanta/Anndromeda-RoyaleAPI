@@ -10,35 +10,30 @@ Write-Host "Setting up Anndromeda RoyaleAPI..." -ForegroundColor Cyan
 # Ensure Git is installed
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     Write-Host "[X] Git is not installed! Please install it from https://git-scm.com/downloads" -ForegroundColor Red
-    Pause
     exit 1
 }
 
 # Ensure Node.js is installed
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
     Write-Host "[X] Node.js is not installed! Please install it from https://nodejs.org/en" -ForegroundColor Red
-    Pause
     exit 1
 }
 
 # Ensure npm is installed
 if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
     Write-Host "[X] npm is not installed! Please install it from https://nodejs.org/en" -ForegroundColor Red
-    Pause
     exit 1
 }
 
 # Ensure Python is installed
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     Write-Host "[X] Python is not installed! Please install it from https://www.python.org/downloads/" -ForegroundColor Red
-    Pause
     exit 1
 }
 
 # Ensure pip is installed
 if (-not (Get-Command pip -ErrorAction SilentlyContinue)) {
     Write-Host "[X] pip is not installed! Please install it from https://pip.pypa.io/en/stable/installation/" -ForegroundColor Red
-    Pause
     exit 1
 }
 
