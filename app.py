@@ -65,19 +65,9 @@ async def get_item_value():
     """Fetch the value of a specific item based on the query parameter."""
     item_name = request.args.get("name")  # Get item name from query params
 
-    # If no 'name' query parameter, return all items
+    # If no 'name' query parameter, return 400 Bad Request
     if not item_name:
-        all_items = []
-        page_number = 0
-
-        while True:  # Infinite loop until we get no items
-            scrape_done, new_items = await scrape_traderie(page_number)
-            if scrape_done or not new_items:
-                break
-            all_items.extend(new_items)
-            page_number += 1
-
-        return jsonify(all_items)  # Return all items if no 'name' query parameter
+        return jsonify({"error": "Item name is required"}), 400  # Bad Request if no 'name' parameter
 
     # If 'name' is provided, return the value of the specific item
     page_number = 0
