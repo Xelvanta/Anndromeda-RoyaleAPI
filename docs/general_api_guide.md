@@ -1,27 +1,28 @@
-# 🚀 Anndromeda RoyaleAPI | General API Guide   
+# 🚀 Anndromeda RoyaleAPI | General API Guide  
 
-📌 Note: When you enter a URL into your browser’s address bar, a **GET request** is automatically triggered. This is the default HTTP method used by browsers to retrieve data from a server. You do not need to specify the GET method explicitly in the browser; it is handled automatically.
-
-## **Base URL**  
+**Base URL**  
 ```
 http://127.0.0.1:5000
 ```
 
-## **Endpoints**  
+---
+
+## **Endpoints Overview**
+
+| Request Type | Endpoint         | Description                                                  |
+|--------------|------------------|--------------------------------------------------------------|
+| GET          | `/items`         | Returns a list of all items scraped from Traderie.            |
+| GET          | `/item`          | Returns the value of a specific item. Requires `name` query parameter. |
+
+---
 
 ### **1️⃣ Get All Items**  
-**Base Endpoint:**  
-```
-GET /items
-```
-**Description:**  
-- Returns a list of all items scraped from Traderie.
-- The response includes **item names** and **values**.
 
-**Example Request:**  
-```
-GET http://127.0.0.1:5000/items
-```
+| Request Type | GET              |
+|--------------|------------------|
+| Endpoint     | `/items`         |
+| Description  | Returns a list of all items scraped from Traderie, including item names and values. |
+| Example URL  | `GET http://127.0.0.1:5000/items` |
 
 **Example Response:**  
 ```json
@@ -41,57 +42,60 @@ GET http://127.0.0.1:5000/items
 ]
 ```
 
+**Status Codes for `/items`:**
+
+| Status Code | Meaning  | Example Response                     |
+|-------------|----------|---------------------------------------|
+| `200`       | OK       | `[{"name": "14 Karat Gold Infinity Chain","value": "14,000"},{"name": "2019 Party Hat","value": "10,000"},{"name": "2020 Lunar Rat Ears","value": "4,000"}]`                   |
+
 ---
 
 ### **2️⃣ Get a Specific Item's Value**  
-**Base Endpoint:**  
-```
-GET /item
-```
-**Description:**  
-- if the `name` query parameter is provided.
-  - Returns the value of a specific item.
-  - **Stops scraping as soon as it finds the item** (faster than `/items` when searching for a specific item).
 
-**Query Parameter:**  
+| Request Type | GET              |
+|--------------|------------------|
+| Endpoint     | `/item`          |
+| Description  | Returns the value of a specific item based on the `name` query parameter. Stops scraping once the item is found. |
+| Query Parameter | `name` (string) - The URL-encoded name of the item. Required. |
+| Example URL  | `GET http://127.0.0.1:5000/item?name=2019%20Party%20Hat` |
 
-| Parameter | Type   | Required | Description                        |
-|-----------|--------|----------|------------------------------------|
-| `name`    | string | ✅ Required   | The **URL-encoded** name of the item to look up. If not provided, returns all items. |
+**Query Parameter Table:**
 
-### **URL Encoding Example**
-If the item name contains **spaces** or special characters like `&`, `=`, or `#`, replace them with their URL-encoded versions (e.g., `"2019 Party Hat"` → `2019%20Party%20Hat`, `"ALIEN INVASION!!!"` → `ALIEN%20INVASION%21%21%21`).
-```
-GET /item?name=2019%20Party%20Hat
-```
+| Parameter | Type   | Required | Description                                            |
+|-----------|--------|----------|--------------------------------------------------------|
+| `name`    | string | ✅ Required | The URL-encoded name of the item to look up. |
 
-**Example Request (with `name` parameter):**  
-```
-GET http://127.0.0.1:5000/item?name=2019%20Party%20Hat
-```
+**URL Encoding Example:**  
+For special characters or spaces, use their URL-encoded versions.  
+Example:  
+`"2019 Party Hat"` → `2019%20Party%20Hat`
 
 **Example Response (with `name` parameter):**  
 ```json
-{ "value": 1200 }
+{
+  "value": 1200
+}
 ```
 
-**If the item is not found (with `name` parameter):**  
+**If the item is not found:**  
 ```json
-{ "error": "Item not found" }
+{
+  "error": "Item not found"
+}
 ```
 
----
+**Status Codes for `/item`:**
 
-## **Error Handling**  
-| Status Code | Meaning                        | Example Response                     |
-|-------------|--------------------------------|--------------------------------------|
-| `200`       | OK                | `{ "value": 1200 }` |
-| `400`       | Bad Request                | `{"error": "Item name is required"}` |
-| `404`       | Not Found                | `{ "error": "Item not found" }` |
+| Status Code | Meaning  | Example Response                     |
+|-------------|----------|---------------------------------------|
+| `200`       | OK       | `{ "value": 1200 }`                   |
+| `400`       | Bad Request | `{ "error": "Item name is required"}` |
+| `404`       | Not Found | `{ "error": "Item not found" }`       |
 
 ---
 
 ## **Usage Notes**  
-- `/items` scrapes **all pages** and returns everything.  
+
+- `/items` scrapes **all pages** and returns all available items.
 - `/item?name=...` is **faster** since it **stops scraping** once it finds the item.
-- Make sure to **URL-encode spaces** and special characters (e.g., `"2019 Party Hat"` → `2019%20Party%20Hat`, `"ALIEN INVASION!!!"` → `ALIEN%20INVASION%21%21%21`).  
+- Be sure to **URL-encode** any spaces or special characters in item names (e.g., `"2019 Party Hat"` → `2019%20Party%20Hat`, `"ALIEN INVASION!!!"` → `ALIEN%20INVASION%21%21%21`).
