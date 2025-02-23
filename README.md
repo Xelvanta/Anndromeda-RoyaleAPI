@@ -52,6 +52,8 @@ We'll install these dependencies later during installation:
 
 ## ⚙️ Installation
 
+📌 Note: See [provision/](https://github.com/Xelvanta/Anndromeda-RoyaleAPI/tree/main/provision) for automatic provisioning (You'll still need to manually install Google Chrome, Node.js, Python 3.x, and Pip beforehand.). Download `setup.bat` and `setup.bat.ps1`. Running `setup.bat` will automatically clone the repository and install dependencies (Windows only). Alternatively, you can install the program manually:
+
 ### 1. Clone the Repository:
 
 ```bash
