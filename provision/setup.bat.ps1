@@ -73,21 +73,41 @@ if (-not $allInstalled) {
 # Clone the repository into Documents
 Write-Host "Cloning repository into $installPath..."
 if (Test-Path $installPath) {
-    Write-Host "[!] Folder already exists! Pulling latest changes..."
+    Write-Host "[!] Folder already exists! Pulling latest changes..." -ForegroundColor Yellow
     Set-Location $installPath
-    git pull
+    try {
+        git pull
+    } catch {
+        Write-Host "[X] Failed to pull latest changes! Please check your internet connection or resolve any conflicts." -ForegroundColor Red
+        exit 1
+    }
 } else {
-    git clone $repoUrl $installPath
-    Set-Location $installPath
+    try {
+        git clone $repoUrl $installPath
+        Set-Location $installPath
+    } catch {
+        Write-Host "[X] Failed to clone repository! Please check your internet connection." -ForegroundColor Red
+        exit 1
+    }
 }
 
 # Install Node.js dependencies
-Write-Host "Installing Node.js dependencies..."
-npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth
+try {
+    Write-Host "Installing Node.js dependencies..."
+    npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth
+} catch {
+    Write-Host "[X] Failed to install Node.js dependencies." -ForegroundColor Red
+    exit 1
+}
 
 # Install Python dependencies
-Write-Host "Installing Python dependencies..."
-pip install -r requirements.txt
+try {
+    Write-Host "Installing Python dependencies..."
+    pip install -r requirements.txt
+} catch {
+    Write-Host "[X] Failed to install Python dependencies." -ForegroundColor Red
+    exit 1
+}
 
 Write-Host "[i] Installation complete!"
 Write-Host "[i] To start the API, run: cd $installPath && quart run" -ForegroundColor Green
