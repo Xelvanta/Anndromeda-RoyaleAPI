@@ -1,4 +1,4 @@
-import json 
+import json
 import os
 import asyncio
 from quart import Quart, jsonify, request
@@ -10,7 +10,7 @@ cors(app)
 def load_config():
     """
     Loads the configuration from the config.json file.
-    
+
     :return: Parsed JSON configuration.
     """
     with open('config.json') as f:
@@ -22,7 +22,7 @@ concurrent_pages = config['concurrent_pages']
 async def scrape_traderie(page_num):
     """
     Scrapes data from a specified page using a Node.js script.
-    
+
     :param page_num: The page number to scrape.
     :return: A tuple containing a boolean indicating if scraping is done and a list of scraped items.
     """
@@ -34,11 +34,11 @@ async def scrape_traderie(page_num):
         process = await asyncio.create_subprocess_exec(
             *node_command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
-        
+
         stdout, stderr = await process.communicate()
 
         if stderr:
-            print(f"⚠️ Error from Node.js script: {stderr.decode()}")
+            print(f"⚠️ Error from Node.js script (page {page_num}): {stderr.decode()}")
             return True, []
 
         try:
@@ -57,7 +57,7 @@ async def scrape_traderie(page_num):
             return False, items  # Return False (not done) and the scraped items
 
         except json.JSONDecodeError as e:
-            print(f"⚠️ JSON Decoding Error: {e}, Extracted JSON: {json_data}")
+            print(f"⚠️ JSON Decoding Error on page {page_num}: {e}, Extracted JSON: {json_data}")
             return True, []  # Return True (done) and empty list on error
 
     except asyncio.TimeoutError:
@@ -67,7 +67,7 @@ async def scrape_traderie(page_num):
 async def scrape_multiple_pages(start_page, end_page):
     """
     Scrapes multiple pages concurrently.
-    
+
     :param start_page: The starting page number.
     :param end_page: The ending page number.
     :return: A tuple containing a boolean indicating if scraping is done and a list of all collected items.
@@ -75,27 +75,35 @@ async def scrape_multiple_pages(start_page, end_page):
     tasks = []
     for page_num in range(start_page, end_page):
         tasks.append(scrape_traderie(page_num))  # Add each scrape task to the list
-    
-    # Run all scrape tasks concurrently
-    results = await asyncio.gather(*tasks)  
-    
-    all_items = []
-    scrape_done = False  # Initialize scrape_done to False
 
-    for scrape_status, new_items in results:
-        if scrape_status:  # If any page is done (scrape_status is True)
-            scrape_done = True  # Stop the loop if scraping is done
+    # Run all scrape tasks concurrently
+    results = await asyncio.gather(*tasks, return_exceptions=True)  # Capture exceptions
+
+    all_items = []
+    scrape_done = False  # Flag to track whether an invalid page was found
+
+    for result in results:
+        if isinstance(result, Exception):
+            # Handle exceptions raised during scraping
+            print(f"⚠️ Exception during scraping: {result}")
+            scrape_done = True
+            continue
+        
+        scrape_status, new_items = result
+        if scrape_status:  # If there's an error with scraping this page (invalid), mark it as invalid but continue
+            scrape_done = True  # Mark the batch as invalid (stop further processing)
+            continue  # Continue processing other pages even if one fails
 
         if new_items:  # Only add items if the list is not empty
             all_items.extend(new_items)
-    
-    return scrape_done, all_items  # Return both status and collected items
+
+    return scrape_done, all_items  # Return both status (if any page failed) and collected items
 
 @app.route('/items', methods=['GET'])
 async def get_items():
     """
     Endpoint to fetch all scraped items by scraping multiple pages.
-    
+
     :return: A JSON response containing all the scraped items.
     """
     all_items = []
@@ -104,10 +112,13 @@ async def get_items():
 
     while True:
         scrape_done, scrape_results = await scrape_multiple_pages(start_page, end_page)
-        if scrape_done or not scrape_results:  # If done or no new items, break
+
+        # Collect valid items from this batch
+        all_items.extend(scrape_results)
+
+        # If any page in the batch was invalid, stop processing more batches
+        if scrape_done:
             break
-        
-        all_items.extend(scrape_results)  # Collect the items from this batch
 
         start_page = end_page
         end_page += concurrent_pages  # Move the page range forward for the next set of pages
@@ -118,7 +129,7 @@ async def get_items():
 async def get_item_value():
     """
     Endpoint to fetch the value of a specific item by name.
-    
+
     :return: A JSON response containing the item's value or an error if not found.
     """
     item_name = request.args.get("name")  # Get item name from query params
