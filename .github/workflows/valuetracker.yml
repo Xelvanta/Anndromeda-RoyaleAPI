@@ -26,11 +26,11 @@ jobs:
       - name: Set up Node.js dynamically from package.json
         uses: actions/setup-node@v3
         with:
-          node-version-file: 'package.json'
+          node-version: 'lts'
 
       - name: Install Node.js dependencies
         run: |
-          npm install  # Install the Node.js dependencies from package.json
+          npm install
 
       - name: Start API server in background
         run: |
