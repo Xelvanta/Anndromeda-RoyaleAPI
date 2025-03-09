@@ -32,10 +32,12 @@ jobs:
         run: |
           npm install
 
-      - name: Start API server in foreground
+      - name: Start API server in background
         run: |
-          quart run --host=0.0.0.0 --port=5000
-          
+          quart run &
+          echo "Waiting for server to start..."
+          sleep 10
+
       - name: Fetch items and create a new Gist
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
