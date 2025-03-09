@@ -123,6 +123,8 @@ async def get_items():
         start_page = end_page
         end_page += concurrent_pages  # Move the page range forward for the next set of pages
 
+    print(f"ℹ️ Returned {len(all_items)} items") # Print the number of items returned
+
     return jsonify(all_items)
 
 @app.route('/item', methods=['GET'])
