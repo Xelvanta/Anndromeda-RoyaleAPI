@@ -36,7 +36,7 @@ def create_gist(data):
     url = "https://api.github.com/gists"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     payload = {
-        "description": "Auto-generated Gist from RHAPI",
+        "description": "Auto-generated Gist from https://github.com/Xelvanta/Anndromeda-RoyaleAPI",
         "public": True,  # Set to False for private Gists
         "files": {
             filename: {
