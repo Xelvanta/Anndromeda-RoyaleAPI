@@ -18,8 +18,19 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install requests pytz
+
+      - name: Set up Node.js dynamically from package.json
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: 'package.json'
+
+      - name: Install Node.js dependencies
+        run: |
+          npm install  # Install the Node.js dependencies from package.json
 
       - name: Start API server in background
         run: |
