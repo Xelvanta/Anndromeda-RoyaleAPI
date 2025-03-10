@@ -99,6 +99,21 @@ async def scrape_multiple_pages(start_page, end_page):
 
     return scrape_done, all_items  # Return both status (if any page failed) and collected items
 
+def remove_duplicates(items):
+    """
+    Removes duplicate items based on their 'name' field, keeping the first occurrence.
+    
+    :param items: List of item dictionaries.
+    :return: List with duplicates removed.
+    """
+    seen = set()
+    unique_items = []
+    for item in items:
+        if item['name'] not in seen:
+            unique_items.append(item)
+            seen.add(item['name'])
+    return unique_items
+
 @app.route('/items', methods=['GET'])
 async def get_items():
     """
@@ -123,7 +138,10 @@ async def get_items():
         start_page = end_page
         end_page += concurrent_pages  # Move the page range forward for the next set of pages
 
-    print(f"ℹ️ Returned {len(all_items)} items") # Print the number of items returned
+    # Remove duplicates before returning the response
+    all_items = remove_duplicates(all_items)
+
+    print(f"ℹ️ Returned {len(all_items)} items after removing duplicates") # Print the number of items returned
 
     return jsonify(all_items)
 
