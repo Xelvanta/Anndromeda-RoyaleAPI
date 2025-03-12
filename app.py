@@ -5,6 +5,7 @@ import logging
 from quart import Quart, jsonify, request
 from quart_cors import cors
 
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -97,15 +98,31 @@ async def scrape_multiple_pages(start_page, end_page):
 
 def remove_duplicates(items):
     """
-    Removes duplicate items based on their 'name' field, keeping the first occurrence.
+    Removes duplicate items based on their 'name' field, keeping the one with the higher value or 
+    deleting the last occurrence if the values are equal.
     """
-    seen = set()
-    unique_items = []
+    seen = {}
     for item in items:
-        if item['name'] not in seen:
-            unique_items.append(item)
-            seen.add(item['name'])
-    return unique_items
+        name = item['name']
+        value = item.get('value', 0)
+        
+        # If the item is already in the seen dictionary, compare the values
+        if name in seen:
+            existing_item = seen[name]
+            existing_value = existing_item.get('value', 0)
+            
+            # If the current item's value is higher, replace the previous one
+            if value > existing_value:
+                seen[name] = item
+            elif value == existing_value:
+                # If values are the same, keep the first one (effectively removing the last one)
+                continue
+        else:
+            # If the item isn't in the seen dictionary, add it
+            seen[name] = item
+    
+    # Return the list of unique items (values are the last kept item for each name)
+    return list(seen.values())
 
 @app.route('/items', methods=['GET'])
 async def get_items():
