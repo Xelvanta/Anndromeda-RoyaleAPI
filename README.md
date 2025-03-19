@@ -10,7 +10,7 @@ This API was created to interact with the **Traderie** website, a platform where
 
 ### Key Features:
 
-- **Item Fetching**: Retrieve a list of Royale High items and their respective community prices directly from Traderie, providing real-time data for developers, analysts, and users tracking item trends. The API supports fetching the values of specific items using query parameters for more targeted searches.  
+- **Item Fetching**: Retrieve a list of Royale High items and their respective values directly from Traderie, providing real-time data for developers, analysts, and users tracking item trends. The API supports fetching the values of specific items using query parameters for more targeted searches.  
 
 - **Program Integration**: Seamlessly integrate API responses into various programs like Excel, Google Sheets, and other data processing tools, enabling real-time data retrieval, analysis, and automation without manual entry.
 
@@ -19,8 +19,6 @@ This API was created to interact with the **Traderie** website, a platform where
 - **Bulk Data Retrieval**: Supports fetching full lists of items at once, reducing the number of API calls needed and optimizing performance for large-scale data analysis.  
 
 - **Automated Data Analysis**: Easily integrate with data visualization tools like Power BI or Google Sheets, enabling dynamic price tracking and trend analysis.  
-
-- **Stealth Web Scraping**: Utilizes **Puppeteer with stealth mode** to bypass anti-bot detection, ensuring uninterrupted access to real-time item data.  
 
 ---
 
@@ -97,7 +95,7 @@ Make sure to **add Node.js to your PATH** during installation (usually added by 
 Before running your script, make sure you have all required dependencies:
 
 1. Open your terminal.
-2. Navigate to the directory containing `traderie_scraper.js`:
+2. Navigate to the directory containing `fetchData.js`:
 
     ```bash
     cd Anndromeda-RoyaleAPI
@@ -126,17 +124,17 @@ pip install -r requirements.txt
 ### 5. Verify Execution of `traderie_scraper.js`:
 
 1. Open a new terminal.
-2. Navigate to the directory containing `traderie_scraper.js`.
+2. Navigate to the directory containing `fetchData.js`.
 
 3. Run the following command (the `<number>` represents the page number):
 
     ```bash
-    node traderie_scraper.js <number>
+    node fetchData.js <number>
     ```
 
    For example:
-   - `node traderie_scraper.js 0` will scrape **page 0**.
-   - `node traderie_scraper.js 1` will scrape **page 1**.
+   - `node fetchData.js 0` will fetch **page 0**.
+   - `node fetchData.js 1` will fetch **page 1**.
 
 If successful, this indicates that the JavaScript side of things is working.
 
@@ -166,7 +164,7 @@ To run the Quart app:
     http://127.0.0.1:5000/items
     ```
 
-This will start the Quart server and start scraping all pages starting from 0.
+This will start the Quart server and start fetching the Traderie API for all pages starting from 0.
 
 📌 **IMPORTANT: See [docs/general_api_guide.md](docs/general_api_guide.md) for more information.**
 
