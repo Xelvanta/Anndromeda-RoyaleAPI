@@ -37,7 +37,7 @@ def create_gist(data):
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     payload = {
         "description": "Auto-generated Gist from https://github.com/Xelvanta/Anndromeda-RoyaleAPI",
-        "public": True,  # Set to False for private Gists
+        "public": False,  # Set to False for private Gists or True for public Gists
         "files": {
             filename: {
                 "content": json.dumps(data, indent=2)
