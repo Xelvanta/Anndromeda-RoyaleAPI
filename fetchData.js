@@ -37,7 +37,7 @@ async function scrapeTraderie(pageNumber) {
 
     try {
         const scrapedData = await scrapeTraderie(pageNumber);
-        console.log(JSON.stringify({ items: scrapedData }));
+        console.log(JSON.stringify(scrapedData));
     } catch (error) {
         console.error(JSON.stringify({ error: "Fetching failed", details: error.toString() }));
         process.exit(1);

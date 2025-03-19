@@ -41,23 +41,18 @@ async def fetch_traderie_data(page_num):
         stdout, stderr = await process.communicate()
 
         if stderr:
-            logger.warning(f"⚠️ Error from Node.js script (page {page_num}): {stderr.decode()}")
+            logger.error(f"❌ Error from Node.js script (page {page_num}): {stderr.decode()}")
             return True, [], None
 
         try:
             data = json.loads(stdout.decode())
 
             if not data or "items" not in data:
-                logger.warning(f"⚠️ Invalid response format on page {page_num}: {data}")
+                logger.error(f"❌ Invalid response format on page {page_num}: {data}")
                 return True, [], None
 
-            # Handle cases where 'items' is inside another dictionary
-            if isinstance(data['items'], dict):  
-                items = data['items'].get('items', [])  # Extract the actual list of items
-                version = data['items'].get('version')  # Extract version if available
-            else:
-                items = data['items']
-                version = data.get('version')
+            items = data['items']
+            version = data.get('version')
 
             if not isinstance(items, list) or not items:
                 logger.warning(f"⚠️ No valid items found on page {page_num}. Response: {data}")
@@ -67,8 +62,8 @@ async def fetch_traderie_data(page_num):
             return False, items, version
 
         except json.JSONDecodeError as e:
-            logger.warning(f"⚠️ JSON Decoding Error on page {page_num}: {e}")
-            logger.warning(f"Extracted JSON: {stdout.decode()}")
+            logger.error(f"❌ JSON Decoding Error on page {page_num}: {e}")
+            logger.error(f"Extracted JSON: {stdout.decode()}")
             return True, [], None
     
     except asyncio.TimeoutError:
