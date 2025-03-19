@@ -48,7 +48,8 @@ def create_gist(data):
     
     if response.status_code == 201:
         gist_url = response.json().get("html_url", "Unknown URL")
-        print(f"✅ Gist created: {gist_url}")
+        # print(f"✅ Gist created: {gist_url}")
+        print(f"✅ Gist created: Secret")
     else:
         print(f"❌ Failed to create Gist: {response.text}")
 
