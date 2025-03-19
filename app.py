@@ -24,14 +24,14 @@ def load_config():
 config = load_config()
 concurrent_pages = config['concurrent_pages']
 
-async def scrape_traderie(page_num):
+async def fetch_traderie_data(page_num):
     """
-    Scrapes data from a specified page using a Node.js script.
+    Fetches data from the Traderie API using the fetchData.js Node.js script.
     
-    :param page_num: The page number to scrape.
-    :return: A tuple containing a boolean indicating if scraping is done and a list of scraped items.
+    :param page_num: The page number to fetch data for.
+    :return: A tuple containing a boolean indicating if fetching is done and a list of fetched items.
     """
-    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "traderie_scraper.js")
+    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fetchData.js")
     node_command = ["node", script_path, str(page_num)]
 
     try:
@@ -42,111 +42,105 @@ async def scrape_traderie(page_num):
 
         if stderr:
             logger.warning(f"⚠️ Error from Node.js script (page {page_num}): {stderr.decode()}")
-            return True, []
+            return True, [], None
 
         try:
-            stdout_decoded = stdout.decode()
-            json_start = stdout_decoded.find("[{")
-            json_end = stdout_decoded.rfind("}]") + 2
-            json_data = stdout_decoded[json_start:json_end]
-            
-            items = json.loads(json_data)
-            if not items:
-                logger.warning(f"⚠️ No items found on page {page_num}.")
-                return True, []
-            
-            logger.info(f"✅ Successfully scraped {len(items)} items from page {page_num}")
-            return False, items
-        
+            data = json.loads(stdout.decode())
+
+            if not data or "items" not in data:
+                logger.warning(f"⚠️ Invalid response format on page {page_num}: {data}")
+                return True, [], None
+
+            # Handle cases where 'items' is inside another dictionary
+            if isinstance(data['items'], dict):  
+                items = data['items'].get('items', [])  # Extract the actual list of items
+                version = data['items'].get('version')  # Extract version if available
+            else:
+                items = data['items']
+                version = data.get('version')
+
+            if not isinstance(items, list) or not items:
+                logger.warning(f"⚠️ No valid items found on page {page_num}. Response: {data}")
+                return True, [], version
+
+            logger.info(f"✅ Successfully fetched {len(items)} items from page {page_num}")
+            return False, items, version
+
         except json.JSONDecodeError as e:
-            logger.warning(f"⚠️ JSON Decoding Error on page {page_num}: {e}, Extracted JSON: {json_data}")
-            return True, []
+            logger.warning(f"⚠️ JSON Decoding Error on page {page_num}: {e}")
+            logger.warning(f"Extracted JSON: {stdout.decode()}")
+            return True, [], None
     
     except asyncio.TimeoutError:
         logger.error(f"TimeoutExpired: Node.js script timed out on page {page_num}")
-        return True, []
+        return True, [], None
 
-async def scrape_multiple_pages(start_page, end_page):
+async def fetch_multiple_pages(start_page, end_page):
     """
-    Scrapes multiple pages concurrently.
+    Fetches multiple pages concurrently from the Traderie API.
     
     :param start_page: The starting page number.
     :param end_page: The ending page number.
-    :return: A tuple containing a boolean indicating if scraping is done and a list of all collected items.
+    :return: A tuple containing a boolean indicating if fetching is done and a list of all collected items.
     """
-    tasks = [scrape_traderie(page_num) for page_num in range(start_page, end_page)]
+    tasks = [fetch_traderie_data(page_num) for page_num in range(start_page, end_page)]
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
     all_items = []
-    scrape_done = False
+    fetch_done = False
+    version = None
 
     for result in results:
         if isinstance(result, Exception):
-            logger.error(f"⚠️ Exception during scraping: {result}")
-            scrape_done = True
+            logger.error(f"⚠️ Exception during fetching: {result}")
+            fetch_done = True
             continue
         
-        scrape_status, new_items = result
-        if scrape_status:
-            scrape_done = True
+        fetch_status, new_items, fetched_version = result
+        if fetch_status:
+            fetch_done = True
             continue
 
         if new_items:
             all_items.extend(new_items)
 
-    return scrape_done, all_items
+        if fetched_version and not version:
+            version = fetched_version
 
-def remove_duplicates(items):
-    """
-    Removes duplicate items based on their 'name' field, keeping the one with the higher value or 
-    deleting the last occurrence if the values are equal.
-    """
-    seen = {}
-    for item in items:
-        name = item['name']
-        value = item.get('value', 0)
-        
-        # If the item is already in the seen dictionary, compare the values
-        if name in seen:
-            existing_item = seen[name]
-            existing_value = existing_item.get('value', 0)
-            
-            # If the current item's value is higher, replace the previous one
-            if value > existing_value:
-                seen[name] = item
-            elif value == existing_value:
-                # If values are the same, keep the first one (effectively removing the last one)
-                continue
-        else:
-            # If the item isn't in the seen dictionary, add it
-            seen[name] = item
-    
-    # Return the list of unique items (values are the last kept item for each name)
-    return list(seen.values())
+    return fetch_done, all_items, version
 
 @app.route('/items', methods=['GET'])
 async def get_items():
     """
-    Endpoint to fetch all scraped items by scraping multiple pages.
+    Endpoint to fetch all fetched items by fetching multiple pages.
     """
     all_items = []
     start_page = 0
     end_page = concurrent_pages
+    version = None
 
     while True:
-        scrape_done, scrape_results = await scrape_multiple_pages(start_page, end_page)
-        all_items.extend(scrape_results)
-        
-        if scrape_done:
+        fetch_done, fetch_results, fetched_version = await fetch_multiple_pages(start_page, end_page)
+
+        if fetch_results:
+            all_items.extend(fetch_results)
+
+        if fetched_version and not version:
+            version = fetched_version
+
+        if fetch_done:
             break
 
         start_page = end_page
         end_page += concurrent_pages
-    
-    all_items = remove_duplicates(all_items)
-    logger.info(f"Returned {len(all_items)} items after removing duplicates")
-    
-    return jsonify(all_items)
+
+    response_data = {"items": all_items}
+    if version:
+        response_data["version"] = version
+
+    logger.info(f"Returned {len(all_items)} items, version {version}")
+
+    return jsonify(response_data)
 
 @app.route('/item', methods=['GET'])
 async def get_item_value():
@@ -159,13 +153,16 @@ async def get_item_value():
     
     page_number = 0
     while True:
-        scrape_done, new_items = await scrape_traderie(page_number)
-        if scrape_done or not new_items:
+        fetch_done, new_items, _ = await fetch_traderie_data(page_number)
+        if fetch_done or not new_items:
             break
 
         for item in new_items:
             if item.get("name") == item_name:
-                return jsonify({"value": item.get("value")})
+                if item.get('prices') and len(item.get('prices')) > 0:
+                    return jsonify({"value": item['prices'][0].get('user_value')}) # Use user value if there is a price
+                else:
+                    return jsonify({"value": None}) # If no price available return none
         
         page_number += 1
     
