@@ -2,13 +2,13 @@ name: Value Tracker
 
 on:
   schedule:
-    - cron: "0 * * * *"  # Runs every hour
+    - cron: "0 */3 * * *"  # Runs every 3 hours
   workflow_dispatch:  # Allows manual trigger
 
 jobs:
   scrape_and_create_gist:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
