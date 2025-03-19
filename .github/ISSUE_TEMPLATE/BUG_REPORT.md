@@ -37,7 +37,7 @@ To help us debug effectively, please perform the following:
 ### 2️⃣ Debug the Scraper  
 - **Run the scraper** with the following command:
   ```bash
-  node traderie_scraper.js 0
+  node fetchData.js 0
   ```
   (Note: `0` specifies the page number to scrape.)
 1. ✅ If the command works as expected, the JavaScript side is functioning correctly.
