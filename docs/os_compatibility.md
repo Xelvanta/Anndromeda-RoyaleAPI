@@ -14,6 +14,6 @@ The application is primarily developed and tested in the following environment:
 |-------------|-----------------|-------------|---------------------|
 | **Windows**  | **11 Home (24H2)**   | **✅ Working (Default Development Environment)** | 6.0.1-alpha |
 | CentOS Stream     | 9  | ✅ Working     | 6.0.1-alpha               |
-| Ubuntu     | 24.04 LTS  | ⚠️ Partial (Without quart-cors)     | 6.0.1-alpha               |
+| Ubuntu     | 24.04 LTS  | ✅ Working     | 6.0.1-alpha               |
 
 _Last updated: March 2025_
