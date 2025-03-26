@@ -271,5 +271,5 @@ Feel free to fork the project and submit a pull request to help improve **Anndro
 
 By **Anndromeda**  
 A sister company to **Xelvanta Group Systems**  
-For support or inquiries, please contact us at [enquiry.information@proton.me](mailto:enquiry.information@proton.me).  
+For support or inquiries, please contact us at [Xelvanta@proton.me](mailto:Xelvanta@proton.me).  
 GitHub: [https://github.com/Xelvanta](https://github.com/Xelvanta)
