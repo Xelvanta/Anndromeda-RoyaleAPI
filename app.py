@@ -17,6 +17,7 @@ def load_config():
     Loads the configuration from the config.json file.
     
     :return: Parsed JSON configuration.
+    :rtype: dict
     """
     with open('config.json') as f:
         return json.load(f)
@@ -29,7 +30,9 @@ async def fetch_traderie_data(page_num):
     Fetches data from the Traderie API using the fetchData.js Node.js script.
     
     :param page_num: The page number to fetch data for.
+    :type page_num: int
     :return: A tuple containing a boolean indicating if fetching is done and a list of fetched items.
+    :rtype: tuple[bool, list[dict], str | None]
     """
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fetchData.js")
     node_command = ["node", script_path, str(page_num)]
@@ -76,7 +79,10 @@ async def fetch_multiple_pages(start_page, end_page):
     
     :param start_page: The starting page number.
     :param end_page: The ending page number.
+    :type start_page: int
+    :type end_page: int
     :return: A tuple containing a boolean indicating if fetching is done and a list of all collected items.
+    :rtype: tuple[bool, list[dict], str | None]
     """
     tasks = [fetch_traderie_data(page_num) for page_num in range(start_page, end_page)]
     results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -108,6 +114,9 @@ async def fetch_multiple_pages(start_page, end_page):
 async def get_items():
     """
     Endpoint to fetch all fetched items by fetching multiple pages.
+    
+    :return: A tuple containing a JSON response.
+    :rtype: tuple
     """
     all_items = []
     start_page = 0
@@ -141,6 +150,9 @@ async def get_items():
 async def get_item_value():
     """
     Endpoint to fetch the value of a specific item by name.
+
+    :return: A tuple containing a JSON response.
+    :rtype: tuple
     """
     item_name = request.args.get("name")
     if not item_name:

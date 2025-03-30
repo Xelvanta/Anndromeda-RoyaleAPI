@@ -41,11 +41,16 @@ Ensure your code follows the project's formatting and style conventions before c
   ```bash
   black .
   ```  
-- Keep **docstrings** for functions:  
+- Keep **docstrings** for functions. Follow **PEP 257** docstring guidelines:  
   ```python
-  def scrape_traderie(page_num):
+  async def fetch_traderie_data(page_num):
       """
-      Scrapes item names and community values from Traderie.com using Puppeteer.
+      Fetches data from the Traderie API using the fetchData.js Node.js script.
+    
+      :param page_num: The page number to fetch data for.
+      :type page_num: int
+      :return: A tuple containing a boolean indicating if fetching is done and a list of fetched items.
+      :rtype: tuple
       """
   ```
 - Use **f-strings** for formatted output instead of `format()` or `+` concatenation.  
