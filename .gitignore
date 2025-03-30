@@ -13,6 +13,7 @@ Thumbs.db
 # IDE files
 .idea/
 .vscode/
+.vs/
 
 # Build files
 /dist
