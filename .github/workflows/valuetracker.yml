@@ -39,7 +39,7 @@ jobs:
           echo "Waiting for server to start..."
           sleep 10
 
-      - name: Fetch items and create a new Gist
+      - name: Fetch items, create a new Gist, and push to private repository
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: python scripts/update_gist.py
