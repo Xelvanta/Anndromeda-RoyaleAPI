@@ -79,7 +79,7 @@ def upload_to_repo(data):
 
     # Commit and push
     subprocess.run(["git", "-C", repo_path, "config", "user.name", "Xelvanta"], check=True)
-    subprocess.run(["git", "-C", repo_path, "config", "user.email", "Xelvanta@users.noreply.github.com"], check=True)
+    subprocess.run(["git", "-C", repo_path, "config", "user.email", "187991660+Xelvanta@users.noreply.github.com"], check=True)
     subprocess.run(["git", "-C", repo_path, "add", file_path], check=True)
     subprocess.run(["git", "-C", repo_path, "commit", "-m", f"Auto-update {filename}"], check=True)
     subprocess.run(["git", "-C", repo_path, "push"], check=True)
