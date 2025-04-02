@@ -18,6 +18,9 @@ def load_config():
     
     :return: Parsed JSON configuration.
     :rtype: dict
+    :raises FileNotFoundError: If the config.json file doesn't exist in the current working directory.
+    :raises JSONDecodeError: If the JSON data in config.json is malformed.
+    :raises KeyError: If the key concurrent_pages is not found in the config.json file.
     """
     with open('config.json') as f:
         return json.load(f)
@@ -33,6 +36,9 @@ async def fetch_traderie_data(page_num):
     :type page_num: int
     :return: A tuple containing a boolean indicating if fetching is done and a list of fetched items.
     :rtype: tuple[bool, list[dict], str | None]
+    :raises FileNotFoundError: If the fetchData.js file doesn't exist in the same directory.
+    :raises asyncio.SubprocessError: If the subprocess fails to start.
+    :raises UnicodeDecodeError: If stdout.decode() or stderr.decode() encounters encoding issues.
     """
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fetchData.js")
     node_command = ["node", script_path, str(page_num)]
@@ -83,6 +89,7 @@ async def fetch_multiple_pages(start_page, end_page):
     :type end_page: int
     :return: A tuple containing a boolean indicating if fetching is done and a list of all collected items.
     :rtype: tuple[bool, list[dict], str | None]
+    :raises MemoryError: If the machine runs out of memory while fetching pages.
     """
     tasks = [fetch_traderie_data(page_num) for page_num in range(start_page, end_page)]
     results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -116,7 +123,7 @@ async def get_items():
     Endpoint to fetch all fetched items by fetching multiple pages.
     
     :return: A tuple containing a JSON response.
-    :rtype: tuple
+    :raises IndexError: If prices is an empty list.
     """
     all_items = []
     start_page = 0
@@ -152,7 +159,8 @@ async def get_item_value():
     Endpoint to fetch the value of a specific item by name.
 
     :return: A tuple containing a JSON response.
-    :rtype: tuple
+    :rtype: tuple.
+    :raises IndexError: If prices is an empty list.
     """
     item_name = request.args.get("name")
     if not item_name:
