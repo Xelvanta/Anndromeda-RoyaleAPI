@@ -44,14 +44,17 @@ Ensure your code follows the project's formatting and style conventions before c
 - Keep **docstrings** for functions. Follow **PEP 257** docstring guidelines:  
   ```python
   async def fetch_traderie_data(page_num):
-      """
-      Fetches data from the Traderie API using the fetchData.js Node.js script.
+    """
+    Fetches data from the Traderie API using the fetchData.js Node.js script.
     
-      :param page_num: The page number to fetch data for.
-      :type page_num: int
-      :return: A tuple containing a boolean indicating if fetching is done and a list of fetched items.
-      :rtype: tuple
-      """
+    :param page_num: The page number to fetch data for.
+    :type page_num: int
+    :return: A tuple containing a boolean indicating if fetching is done and a list of fetched items.
+    :rtype: tuple[bool, list[dict], str | None]
+    :raises FileNotFoundError: If the fetchData.js file doesn't exist in the same directory.
+    :raises asyncio.SubprocessError: If the subprocess fails to start.
+    :raises UnicodeDecodeError: If stdout.decode() or stderr.decode() encounters encoding issues.
+    """
   ```
 - Use **f-strings** for formatted output instead of `format()` or `+` concatenation.  
 - Avoid **hardcoding paths**, use `os.path.join()` when working with files.  
