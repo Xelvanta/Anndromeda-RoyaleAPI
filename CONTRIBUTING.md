@@ -65,17 +65,17 @@ Ensure your code follows the project's formatting and style conventions before c
 - Follow **ES6+ best practices**:  
   - Use `const` and `let` instead of `var`.  
   - Use arrow functions (`()=>{}`) where applicable.  
-- Keep **console logs structured**:  
+- Log valid JSON data **without any additional structure**:  
   ```js
-  console.log(`🌐 Navigating to ${url}`);
+  console.log(JSON.stringify(scrapedData));
+  ```
+- Keep error messages **structured**:
+  ```js
+  console.error(`❌ Error fetching data from API (page ${pageNumber}):`, error);
   ```
 - Format using **Prettier**:  
   ```bash
   npm run format
-  ```  
-- Avoid **hardcoded delays** like `setTimeout()`, prefer waiting for selectors instead:  
-  ```js
-  await page.waitForSelector('div.item-img-container', { timeout: 15000 });
   ```
 - Ensure all **async functions handle errors** using try-catch:  
   ```js
@@ -85,6 +85,12 @@ Ensure your code follows the project's formatting and style conventions before c
       console.error("❌ Scraping failed:", error);
   }
   ```
+- **Legacy Note:** Avoid **hardcoded delays** like `setTimeout()`, prefer waiting for selectors instead:  
+  ```js
+  await page.waitForSelector('div.item-img-container', { timeout: 15000 });
+  ```
+  > ⚠️ **Note:** As of `v6.0.0` class selectors are irrelevant. Starting from version 6, we use the Traderie API instead of scraping the forward-facing marketplace.  
+  > This guideline is kept for reference for contributors working on older branches.
 
 Make sure all files are formatted before committing to maintain consistency! 🚀
 - Symbols like ✅, ⚠️, ⏳, ❌, 🔍, and 🌐 should be used in console logs and debug messages for better readability.
