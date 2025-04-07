@@ -89,7 +89,7 @@ Ensure your code follows the project's formatting and style conventions before c
   ```js
   await page.waitForSelector('div.item-img-container', { timeout: 15000 });
   ```
-  > ⚠️ **Note:** As of `v6.0.0` class selectors are irrelevant. Starting from version 6, we use the Traderie API instead of scraping the forward-facing marketplace.  
+  > ⚠️ **Note:** As of `v6.0.0`, class selectors are irrelevant. Starting from version 6, we make a GET request to the Traderie API via loading the endpoint in a headless client. This is opposed to scraping the forward-facing marketplace.  
   > This guideline is kept for reference for contributors working on older branches.
 
 Make sure all files are formatted before committing to maintain consistency! 🚀
