@@ -13,6 +13,7 @@ puppeteer.use(StealthPlugin());
  * @throws {Error} If navigation to the URL fails.
  * @throws {TypeError} If the expected <pre> element is missing from the page.
  * @throws {SyntaxError} If the JSON data is malformed.
+ * @see https://traderie.com/api/royalehigh/items?variants=&tags=true&page=${pageNumber}
  */
 async function scrapeTraderie(pageNumber) {
     const url = `https://traderie.com/api/royalehigh/items?variants=&tags=true&page=${pageNumber}`;
