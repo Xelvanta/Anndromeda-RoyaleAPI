@@ -6,6 +6,61 @@ These tasks need to be completed before the release of RHAPI7:
 
 ---
 
+## Adaptive Page Seeking (High Priority)
+
+### ✅ Step-by-Step Logic
+
+1. **Initial Run (Indexing):**
+
+   * Scrape all items across all pages.
+   * Build a dictionary:
+     **`item_page_map = { item_name: page_number }`**
+
+2. **On Each New Run:**
+
+   #### 🔁 For each item being tracked:
+
+   * **If item is already in `item_page_map`:**
+
+     * Go to the remembered page.
+     * If found, update page in memory if necessary.
+     * If not found:
+
+       * Use first and last items on the page to guess:
+
+         * If item is before first → go back.
+         * If after last → go forward.
+         * Repeat until found or out of bounds.
+   * **If item is *not* in memory (new or unknown):**
+
+     * Use the current memory map to **interpolate its likely page**:
+
+       #### 📈 Predictive Positioning:
+
+       * Sort `item_page_map` by item name (alphabetically).
+       * Find two known items where:
+
+         * `item_A < new_item < item_B`
+       * Let:
+
+         * `page_A = item_page_map[item_A]`
+         * `page_B = item_page_map[item_B]`
+       * Estimate:
+
+         ```python
+         predicted_page = round((page_A + page_B) / 2)
+         ```
+       * Go to that page and look for the item.
+
+         * If not found, use first/last alphabetical fallback logic as above.
+
+3. **Update Memory:**
+
+   * If item is found on a new or predicted page → update `item_page_map[item_name] = page_number`.
+   * If not found after smart paging return None.
+   
+---
+
 ## **1. Update `/item` Endpoint** (High Priority)
 
 * **Goal**: Refactor the `/item` endpoint to utilize the item ID for identification instead of the URL-encoded item name.
