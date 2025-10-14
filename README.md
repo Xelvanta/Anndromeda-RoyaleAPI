@@ -3,7 +3,7 @@
 > ⚠️ **Project On Hold**
 > 
 > **Notice:** This project is currently **on hold indefinitely**. We are **seeking a new lead developer and maintainers** to continue development.  
-> A list of much-needed updates and tasks is available at [TODO.md](TODO.md).
+> A list of much-needed updates and tasks is available at [todo/TODO.md](todo/TODO.md).
 >
 > If you are interested in helping or have questions, please contact:  
 > - **Xelvanta Group's official corporate email address:** [Xelvanta@proton.me](mailto:Xelvanta@proton.me), or  
