@@ -1,3 +1,16 @@
+> [!WARNING]
+> ![Project On Hold](https://img.shields.io/badge/status-on%20hold-orange)  
+> ⚠️ **Project On Hold**
+> 
+> **Notice:** This project is currently **on hold indefinitely**. We are **seeking a new lead developer and maintainers** to continue development.  
+> A list of much-needed updates and tasks is available at [TODO.md](TODO.md).
+>
+> If you are interested in helping or have questions, please contact:  
+> - **Xelvanta Group's official corporate email address:** [Xelvanta@proton.me](mailto:Xelvanta@proton.me), or  
+> - **Anndromeda's founder on X (Twitter):** [@Alinakitties](https://x.com/Alinakitties)
+>
+> *Success demands data.*
+
 # 🚀 Anndromeda RoyaleAPI
 
 ![GitHub License](https://img.shields.io/github/license/Xelvanta/Anndromeda-RoyaleAPI?label=License&color=orange)
