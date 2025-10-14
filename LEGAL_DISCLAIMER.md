@@ -1,6 +1,6 @@
 ## Legal Disclaimer
 
-This project is **independently developed** and has **no official connection** with Traderie or any of its affiliates. If you are affiliated with Traderie and wish to discuss the inclusion of their content or make a request for removal, feel free to contact the creator.
+This project is **independently developed** and has **no official connection** with Traderie or any of its affiliates. If you are affiliated with Traderie and wish to discuss the inclusion of their content or make a request for removal, please contact Xelvanta Group at Xelvanta@proton.me.
 
 ### **No Official Endorsement**
 
