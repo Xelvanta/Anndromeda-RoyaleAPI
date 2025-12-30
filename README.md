@@ -1,7 +1,3 @@
-Yes! Right now it’s functional, but it’s quite dense and mixes instructions, setup, troubleshooting, and explanation all in one flow. A cleaner structure could make it easier for new users to follow. Here’s a recommended restructure:
-
----
-
 # 🚀 Anndromeda RoyaleAPI
 
 ![License](https://img.shields.io/github/license/Xelvanta/Anndromeda-RoyaleAPI?label=License\&color=orange)
