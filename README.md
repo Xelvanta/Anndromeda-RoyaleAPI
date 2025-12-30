@@ -72,6 +72,13 @@ git clone https://github.com/Xelvanta/Anndromeda-RoyaleAPI
 cd Anndromeda-RoyaleAPI
 ```
 
+Optionally create and activate a virtual environment:
+
+```powershell
+py -3.13 -m venv venv
+venv\Scripts\activate
+```
+
 ### 2. Install Node.js and Puppeteer
 
 Make sure you have **Node.js** installed. If not, follow these steps:
@@ -166,7 +173,7 @@ To run the Quart app:
 2. Run the following:
 
     ```bash
-    quart run
+    python app.py
     ```
     
 3. **Access the API**:
@@ -179,7 +186,7 @@ To run the Quart app:
 
 This will start the Quart server and start fetching the Traderie API for all pages starting from 0.
 
-📌 **IMPORTANT: See [docs/general_api_guide.md](docs/general_api_guide.md) for more information.**
+📌 **IMPORTANT: See [API_DOCUMENTATION.md](docs/7-beta/API_DOCUMENTATION.md) for more information.**
 
 ---
 

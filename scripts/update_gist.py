@@ -88,5 +88,11 @@ def upload_to_repo(data):
 
 # Fetch items and process
 items = fetch_items()
+
+# Abort if fetching failed
+if "error" in items:
+    print(f"❌ Aborting: fetch_items failed with message: {items['error']}")
+    exit(1)
+
 create_gist(items)
 upload_to_repo(items)

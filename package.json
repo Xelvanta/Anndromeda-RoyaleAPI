@@ -1,7 +1,7 @@
 {
   "name": "Anndromeda-RoyaleAPI",
-  "version": "6-alpha",
-  "description": "**Anndromeda RoyaleAPI** (formerly known as Royale High API) is a powerful **Quart API** designed to fetch the names of items from the popular Roblox game **Royale High** and their associated community values from **Traderie**. The API returns results in **JSON format**, making it easy to integrate and use for various applications or analysis.",
+  "version": "7-alpha",
+  "description": "**Anndromeda RoyaleAPI** is a powerful **Quart API** designed to fetch the names of items from the popular Roblox game **Royale High** and their associated community values from **Traderie**. The API returns results in **JSON format**, making it easy to integrate and use for various applications or analysis.",
   "main": "fetchData.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,7 +18,8 @@
   },
   "homepage": "https://github.com/Xelvanta/Anndromeda-RoyaleAPI#readme",
   "dependencies": {
-    "puppeteer": "^24.2.1",
+    "express": "^5.2.1",
+    "puppeteer": "^24.34.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
   }

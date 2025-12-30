@@ -27,3 +27,6 @@ __pycache__/
 # Python virtual environments
 venv/
 env/
+
+# Generated item index
+item_index.json

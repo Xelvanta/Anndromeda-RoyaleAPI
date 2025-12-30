@@ -1,67 +1,157 @@
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+/**
+ * fetchData.js
+ *
+ * Long-lived Puppeteer service that fetches Traderie API pages
+ * using a single Chromium instance and a reusable page pool.
+ *
+ * This avoids repeatedly launching browsers and preserves
+ * cookies, TLS fingerprints, and behavioral consistency.
+ */
+
+const express = require("express");
+const puppeteer = require("puppeteer-extra");
+const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+
 puppeteer.use(StealthPlugin());
 
-/**
- * Fetches data from the Traderie API.
- * 
- * @async
- * @function scrapeTraderie
- * @param {number} pageNumber - The page number to fetch from the API.
- * @returns {Promise<Object[]>} A promise that resolves to an array of scraped data objects.
- * @throws {Error} If Puppeteer fails to launch.
- * @throws {Error} If navigation to the URL fails.
- * @throws {TypeError} If the expected <pre> element is missing from the page.
- * @throws {SyntaxError} If the JSON data is malformed.
- * @see https://traderie.com/api/royalehigh/items?variants=&tags=true&page=${pageNumber}
- */
-async function scrapeTraderie(pageNumber) {
-    const url = `https://traderie.com/api/royalehigh/items?variants=&tags=true&page=${pageNumber}`;
+const app = express();
+app.use(express.json());
 
-    try {
-        const browser = await puppeteer.launch({
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+/**
+ * Puppeteer browser instance (single, global)
+ * @type {import('puppeteer').Browser}
+ */
+let browser;
+
+/**
+ * Pool of reusable pages (tabs)
+ * @type {import('puppeteer').Page[]}
+ */
+const pagePool = [];
+
+/**
+ * Maximum concurrent pages allowed.
+ * This limits load and reduces bot-detection risk.
+ */
+const MAX_PAGES = 5;
+
+/**
+ * Initializes the Puppeteer browser and pre-allocates pages.
+ */
+async function initBrowser() {
+    browser = await puppeteer.launch({
+        headless: "new",
+        args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox"
+        ]
+    });
+
+    for (let i = 0; i < MAX_PAGES; i++) {
         const page = await browser.newPage();
 
-        await page.goto(url, { waitUntil: 'domcontentloaded' });
+        // Set a realistic user agent
+        await page.setUserAgent(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+            "AppleWebKit/537.36 (KHTML, like Gecko) " +
+            "Chrome/120.0.0.0 Safari/537.36"
+        );
 
-        /**
-         * Extracts JSON data from the page content.
-         * 
-         * @returns {Object[]} Parsed JSON data from the page.
-         */
-        const data = await page.evaluate(() => {
-            return JSON.parse(document.querySelector('pre').innerText);
-        });
-
-        await browser.close();
-
-        if (!data) {
-            throw new Error('No data found');
-        }
-
-        return data;
-
-    } catch (error) {
-        console.error(`❌ Error fetching data from API (page ${pageNumber}):`, error);
-        return [];
+        pagePool.push(page);
     }
+
+    console.log(`✅ Browser initialized with ${MAX_PAGES} pages`);
 }
 
 /**
- * Immediately Invoked Function Expression (IIFE) to execute scraping.
- * Retrieves the page number from command-line arguments and calls scrapeTraderie.
+ * Acquires a page from the pool.
+ * Waits if no pages are currently available.
+ *
+ * @returns {Promise<import('puppeteer').Page>}
  */
-(async () => {
-    const pageNumber = parseInt(process.argv[2], 10) || 0;
+async function acquirePage() {
+    while (pagePool.length === 0) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    return pagePool.pop();
+}
+
+/**
+ * Returns a page back to the pool.
+ *
+ * @param {import('puppeteer').Page} page
+ */
+function releasePage(page) {
+    pagePool.push(page);
+}
+
+/**
+ * Fetch Traderie data for a given page number.
+ *
+ * Endpoint:
+ *   GET /traderie?page=<number>
+ */
+app.get("/traderie", async (req, res) => {
+    const pageNumber = Number(req.query.page ?? 0);
+    const url = `https://traderie.com/api/royalehigh/items?variants=&tags=true&page=${pageNumber}`;
+
+    let page;
 
     try {
-        const scrapedData = await scrapeTraderie(pageNumber);
-        console.log(JSON.stringify(scrapedData));
+        page = await acquirePage();
+
+        await page.goto(url, { waitUntil: "domcontentloaded" });
+
+        const data = await page.evaluate(() => {
+            const pre = document.querySelector("pre");
+            if (!pre) {
+                throw new Error("Expected <pre> element not found");
+            }
+            return JSON.parse(pre.innerText);
+        });
+
+        res.json(data);
+
     } catch (error) {
-        console.error(JSON.stringify({ error: "Fetching failed", details: error.toString() }));
-        process.exit(1);
+        console.error(`❌ Failed to fetch page ${pageNumber}:`, error.message);
+        res.status(500).json({ error: error.message });
+
+    } finally {
+        if (page) {
+            // Clear page state between requests
+            await page.goto("about:blank");
+            releasePage(page);
+        }
     }
-})();
+});
+
+/**
+ * Graceful shutdown handler.
+ */
+async function shutdown() {
+    console.log("🛑 Shutting down Puppeteer service...");
+    if (browser) {
+        await browser.close();
+    }
+    process.exit(0);
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+
+/**
+ * Service entry point.
+ */
+// Immediately listen
+const server = app.listen(3001, () => {
+    console.log("🚀 Puppeteer service listening on port 3001");
+    process.stdout.write("NODE_READY\n");
+});
+
+// Initialize browser asynchronously in background
+initBrowser().catch(err => {
+    console.error("❌ Browser init failed:", err);
+    process.exit(1);
+});
+
+

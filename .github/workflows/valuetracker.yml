@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.13"
 
       - name: Install Python dependencies
         run: |
@@ -30,14 +30,13 @@ jobs:
           node-version: '18'
 
       - name: Install Node.js dependencies
-        run: |
-          npm install
+        run: npm install
 
       - name: Start API server in background
         run: |
-          quart run &
+          python app.py &
           echo "Waiting for server to start..."
-          sleep 10
+          sleep 15
 
       - name: Fetch items, create a new Gist, and push to private repository
         env:
