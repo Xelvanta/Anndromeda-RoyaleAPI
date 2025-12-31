@@ -15,6 +15,7 @@ from functools import wraps
 import json
 import logging
 import os
+import platform
 import signal
 import sys
 import aiohttp
@@ -100,13 +101,13 @@ async def start_node_service():
             break
 
 def stop_node_service():
-    """
-    Ensures the Node.js process is terminated on Python exit.
-    """
     global node_process
     if node_process and node_process.returncode is None:
         logger.info("🛑 Stopping Node.js service...")
-        node_process.send_signal(signal.SIGINT)
+        if platform.system() == "Windows":
+            node_process.terminate()  # safe on Windows
+        else:
+            node_process.send_signal(signal.SIGINT)
 
 async def node_watchdog():
     global node_process, node_retries
@@ -425,24 +426,22 @@ async def restart_node():
 
 # -------------------- Entry Point --------------------
 
-def stop_all_services():
-    """Ensures everything shuts down gracefully."""
-    global db_conn
-    stop_node_service()
-    if db_conn:
-        # Close the persistent SQLite connection
-        asyncio.get_event_loop().run_until_complete(db_conn.close())
-
-atexit.register(stop_all_services)
-
-async def main():
-    await init_db() # Initializes WAL mode and global connection
-
-    # 1. Start Node service
+@app.before_serving
+async def startup_tasks():
+    await init_db()
     await start_node_service()
     asyncio.create_task(node_watchdog())
 
-    # 2. Start Quart using Hypercorn
+@app.after_serving
+async def shutdown_tasks():
+    stop_node_service()
+    if node_process:
+        await node_process.wait()
+    if db_conn:
+        await db_conn.close()
+
+async def main():
+    # Start Quart using Hypercorn
     config = Config()
     config.bind = [BIND]
     await serve(app, config)

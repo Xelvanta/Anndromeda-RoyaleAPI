@@ -30,3 +30,5 @@ env/
 
 # Generated item index
 item_index.db
+item_index.db-wal
+item_index.db-shm
