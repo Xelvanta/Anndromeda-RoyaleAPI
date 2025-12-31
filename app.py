@@ -18,6 +18,7 @@ import os
 import signal
 import sys
 import aiohttp
+import aiosqlite
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
 from quart import abort, Quart, jsonify, request
@@ -33,6 +34,10 @@ BIND = PYTHON_CONFIG.get("bind", "127.0.0.1:5000")
 CONCURRENT_PAGES = PYTHON_CONFIG.get("concurrent_pages", 5)
 MAX_RETRIES = PYTHON_CONFIG.get("max_retries", 3)
 NODE_SERVICE_URL = PYTHON_CONFIG.get("node_service_url", "http://localhost:3001/traderie")
+
+# Add a Semaphore to limit global concurrent scraping tasks
+# This should match or be slightly lower than MAX_PAGES in your Node config
+scraper_semaphore = asyncio.Semaphore(PYTHON_CONFIG.get("concurrent_pages", 5))
 
 # -------------------- Logging --------------------
 
@@ -123,47 +128,50 @@ async def node_watchdog():
                     logger.critical(f"❌ Max consecutive retries ({NODE_MAX_RETRIES}) reached. Node service disabled.")
                     node_process = None
 
-# ------------------- Item Indexing -------------------
+# ------------------- Item Indexing (SQLite) -------------------
 
-INDEX_FILE = os.path.join(os.path.dirname(__file__), "item_index.json")
+DB_FILE = os.path.join(os.path.dirname(__file__), "item_index.db")
 
 # Load the index from disk, or initialize empty
-def load_index():
-    if os.path.exists(INDEX_FILE):
-        with open(INDEX_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+async def init_db():
+    async with aiosqlite.connect(DB_FILE) as db:
+        # We use a unique constraint on item_id to prevent duplicates
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS items (
+                id TEXT PRIMARY KEY,
+                name TEXT,
+                page INTEGER,
+                last_seen TEXT
+            )
+        """)
+        await db.commit()
 
-# Save the index to disk
-def save_index(index):
-    with open(INDEX_FILE, "w", encoding="utf-8") as f:
-        json.dump(index, f, ensure_ascii=False, indent=2)
+async def update_index_db(items_with_pages):
+    async with aiosqlite.connect(DB_FILE) as db:
+        data = [
+            (item.get("id"), item.get("name"), page, datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
+            for item, page in items_with_pages
+            if item.get("id")
+        ]
+        # Replace/Update logic
+        await db.executemany("""
+            INSERT OR REPLACE INTO items (id, name, page, last_seen)
+            VALUES (?, ?, ?, ?)
+        """, data)
+        await db.commit()
 
-# Update index for a list of items
-def update_index(items_with_pages, index):
-    for item, page_num in items_with_pages:
-        name = item.get("name")
-        item_id = item.get("id")
-        if name and item_id:
-            if name not in index:
-                index[name] = []
-            # Only append if this id is not already indexed
-            if not any(entry["id"] == item_id for entry in index[name]):
-                index[name].append({"id": item_id, "page": page_num})
-    save_index(index)
+async def get_indexed_page(item_id):
+    async with aiosqlite.connect(DB_FILE) as db:
+        async with db.execute("SELECT page FROM items WHERE id = ?", (item_id,)) as cursor:
+            row = await cursor.fetchone()
+            return row[0] if row else None
 
-def remove_missing_from_index(missing_ids, index):
-    """Remove items with IDs in missing_ids from the index."""
-    changed = False
-    for name in list(index.keys()):
-        new_entries = [e for e in index[name] if e.get("id") not in missing_ids]
-        if len(new_entries) != len(index[name]):
-            index[name] = new_entries
-            changed = True
-        if not index[name]:
-            del index[name]
-    if changed:
-        save_index(index)
+async def remove_missing_from_db(item_ids):
+    if not item_ids:
+        return
+    async with aiosqlite.connect(DB_FILE) as db:
+        await db.execute(f"DELETE FROM items WHERE id IN ({','.join(['?']*len(item_ids))})", item_ids)
+        await db.commit()
 
 # -------------------- Fetch Logic --------------------
 
@@ -175,37 +183,37 @@ async def fetch_traderie_page(session, page_num):
     :param page_num: page number to fetch
     :return: tuple (fetch_done, items, version)
     """
-    try:
-        async with session.get(
-            NODE_SERVICE_URL,
-            params={"page": page_num},
-            timeout=30
-        ) as resp:
+    async with scraper_semaphore:
+        try:
+            async with session.get(
+                NODE_SERVICE_URL,
+                params={"page": page_num},
+                timeout=30
+            ) as resp:
 
-            if resp.status != 200:
-                logger.error(f"❌ Node service error on page {page_num}")
-                return True, [], None
+                if resp.status != 200:
+                    logger.error(f"❌ Node service error on page {page_num}")
+                    return True, [], None
 
-            data = await resp.json()
+                data = await resp.json()
 
-            items = data.get("items", [])
-            version = data.get("version")
+                items = data.get("items", [])
+                version = data.get("version")
 
-            if not items:
-                logger.info(f"⚠️ No items on page {page_num}")
-                return True, [], version
+                if not items:
+                    logger.info(f"⚠️ No items on page {page_num}")
+                    return True, [], version
 
-            logger.info(f"✅ Page {page_num}: {len(items)} items")
-            return False, items, version
+                logger.info(f"✅ Page {page_num}: {len(items)} items")
+                return False, items, version
 
-    except asyncio.TimeoutError:
-        logger.error(f"⏱ Timeout on page {page_num}")
-        return True, [], None
+        except asyncio.TimeoutError:
+            logger.error(f"⏱ Timeout on page {page_num}")
+            return True, [], None
 
-    except Exception as e:
-        logger.exception(f"❌ Fetch failed on page {page_num}: {e}")
-        return True, [], None
-
+        except Exception as e:
+            logger.exception(f"❌ Fetch failed on page {page_num}: {e}")
+            return True, [], None
 
 async def fetch_multiple_pages(start_page, count):
     all_items = []
@@ -279,7 +287,6 @@ async def get_items():
     all_items = []
     start_page = 0
     version = None
-    index = load_index()
     fetched_ids = set()
 
     while True:
@@ -288,7 +295,7 @@ async def get_items():
             all_items.extend(items)
             items_ids = [item.get("id") for item in items if item.get("id")]
             fetched_ids.update(items_ids)
-            update_index(items_with_pages, index)
+            await update_index_db(items_with_pages)
 
         if fetched_version and not version:
             version = fetched_version
@@ -299,10 +306,13 @@ async def get_items():
         start_page += CONCURRENT_PAGES
 
     # Remove any index entries that were not found in the fetched pages
-    all_indexed_ids = [e["id"] for entries in index.values() for e in entries]
+    async with aiosqlite.connect(DB_FILE) as db:
+        async with db.execute("SELECT id FROM items") as cursor:
+            all_indexed_ids = [row[0] for row in await cursor.fetchall()]
+
     missing_ids = [id_ for id_ in all_indexed_ids if id_ not in fetched_ids]
     if missing_ids:
-        remove_missing_from_index(missing_ids, index)
+        await remove_missing_from_db(missing_ids)
 
     logger.info(f"Returned {len(all_items)} items")
     response = {"items": all_items}
@@ -317,19 +327,17 @@ async def get_item():
     if not item_id:
         return jsonify({"error": "Item id required"}), 400
 
-    index = load_index()
     version = None
     found_item = None
 
-    # Helper: get page from index
-    def get_indexed_page():
-        for entries in index.values():
-            for entry in entries:
-                if entry.get("id") == item_id:
-                    return entry.get("page", 0)
-        return None
+    # Helper: get page from database
+    async def get_indexed_page(item_id):
+        async with aiosqlite.connect(DB_FILE) as db:
+            async with db.execute("SELECT page FROM items WHERE id = ?", (item_id,)) as cursor:
+                row = await cursor.fetchone()
+                return row[0] if row else None
 
-    start_page = get_indexed_page()
+    start_page = await get_indexed_page(item_id)
     async with aiohttp.ClientSession() as session:
 
         # Fetch indexed page if exists
@@ -337,7 +345,7 @@ async def get_item():
             fetch_done, items_chunk, chunk_version, items_with_pages = await fetch_multiple_pages(start_page, 1)
             if chunk_version:
                 version = chunk_version
-            update_index(items_with_pages, index)
+            await update_index_db(items_with_pages)
             for item in items_chunk:
                 if item.get("id") == item_id:
                     found_item = item
@@ -350,7 +358,7 @@ async def get_item():
                 fetch_done, items_chunk, chunk_version, items_with_pages = await fetch_multiple_pages(start_page, CONCURRENT_PAGES)
                 if chunk_version and not version:
                     version = chunk_version
-                update_index(items_with_pages, index)
+                await update_index_db(items_with_pages)
                 for item in items_chunk:
                     if item.get("id") == item_id:
                         found_item = item
@@ -361,7 +369,7 @@ async def get_item():
 
         # If still not found, remove from index
         if not found_item and start_page is not None:
-            remove_missing_from_index([item_id], index)
+            await remove_missing_from_db([item_id])
 
     if found_item:
         return jsonify({"item": found_item, "version": version})
@@ -413,6 +421,8 @@ async def restart_node():
 # -------------------- Entry Point --------------------
 
 async def main():
+    await init_db()
+
     # 1. Start Node service
     await start_node_service()
     asyncio.create_task(node_watchdog())

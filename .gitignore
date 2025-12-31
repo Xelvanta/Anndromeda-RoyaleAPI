@@ -29,4 +29,4 @@ venv/
 env/
 
 # Generated item index
-item_index.json
+item_index.db
