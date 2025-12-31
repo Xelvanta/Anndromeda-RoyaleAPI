@@ -151,16 +151,23 @@ async def init_db():
 
 async def update_index_db(items_with_pages):
     if not items_with_pages: return
-    data = [
-        (item.get("id"), item.get("name"), page, datetime.now(timezone.utc).isoformat())
-        for item, page in items_with_pages if item.get("id")
-    ]
-    # Uses the persistent global connection
-    await db_conn.executemany("""
-        INSERT OR REPLACE INTO items (id, name, page, last_seen)
-        VALUES (?, ?, ?, ?)
-    """, data)
-    await db_conn.commit()
+    try:
+        data = [
+            (item.get("id"), item.get("name"), page, datetime.now(timezone.utc).isoformat())
+            for item, page in items_with_pages if item.get("id")
+        ]
+        await db_conn.executemany("""
+            INSERT OR REPLACE INTO items (id, name, page, last_seen)
+            VALUES (?, ?, ?, ?)
+        """, data)
+        await db_conn.commit()
+    except aiosqlite.OperationalError as e:
+        if "locked" in str(e).lower():
+            logger.warning("Database locked, background update skipped. It will sync on next request.")
+        else:
+            logger.error(f"Background DB Error: {e}")
+    except Exception as e:
+        logger.error(f"Unexpected DB Error: {e}")
 
 async def get_indexed_page(item_id):
     async with db_conn.execute("SELECT page FROM items WHERE id = ?", (item_id,)) as cursor:
@@ -295,7 +302,7 @@ async def get_items():
             all_items.extend(items)
             items_ids = [item.get("id") for item in items if item.get("id")]
             fetched_ids.update(items_ids)
-            await update_index_db(items_with_pages)
+            asyncio.create_task(update_index_db(items_with_pages))
 
         if fetched_version and not version:
             version = fetched_version
@@ -311,7 +318,7 @@ async def get_items():
 
     missing_ids = [id_ for id_ in all_indexed_ids if id_ not in fetched_ids]
     if missing_ids:
-        await remove_missing_from_db(missing_ids)
+        asyncio.create_task(remove_missing_from_db(missing_ids))
 
     logger.info(f"Returned {len(all_items)} items")
     response = {"items": all_items}
@@ -342,7 +349,7 @@ async def get_item():
             fetch_done, items_chunk, chunk_version, items_with_pages = await fetch_multiple_pages(start_page, 1)
             if chunk_version:
                 version = chunk_version
-            await update_index_db(items_with_pages)
+            asyncio.create_task(update_index_db(items_with_pages))
             for item in items_chunk:
                 if item.get("id") == item_id:
                     found_item = item
@@ -355,7 +362,7 @@ async def get_item():
                 fetch_done, items_chunk, chunk_version, items_with_pages = await fetch_multiple_pages(start_page, CONCURRENT_PAGES)
                 if chunk_version and not version:
                     version = chunk_version
-                await update_index_db(items_with_pages)
+                asyncio.create_task(update_index_db(items_with_pages))
                 for item in items_chunk:
                     if item.get("id") == item_id:
                         found_item = item
@@ -366,7 +373,7 @@ async def get_item():
 
         # If still not found, remove from index
         if not found_item and start_page is not None:
-            await remove_missing_from_db([item_id])
+            asyncio.create_task(remove_missing_from_db([item_id]))
 
     if found_item:
         return jsonify({"item": found_item, "version": version})
