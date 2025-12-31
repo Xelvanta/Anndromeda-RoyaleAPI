@@ -341,9 +341,10 @@ async def get_item():
         async with db_conn.execute("SELECT page FROM items WHERE id = ?", (item_id,)) as cursor:
             row = await cursor.fetchone()
             return row[0] if row else None
-        start_page = await get_indexed_page(item_id)
-        async with aiohttp.ClientSession() as session:
-
+            
+    start_page = await get_indexed_page(item_id)
+        
+    async with aiohttp.ClientSession() as session:
         # Fetch indexed page if exists
         if start_page is not None:
             fetch_done, items_chunk, chunk_version, items_with_pages = await fetch_multiple_pages(start_page, 1)
@@ -448,3 +449,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
