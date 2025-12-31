@@ -76,7 +76,7 @@ pip install -r requirements.txt
 ## ▶️ Running the API
 
 ```bash
-hypercorn app:app
+python app.py
 ```
 
 * **Access endpoints:** `/items`, `/item?id=<ID>`, `/health`, or `/node/restart`
