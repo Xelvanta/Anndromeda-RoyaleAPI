@@ -42,8 +42,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-logging.basicConfig(level=logging.DEBUG)
-
 # -------------------- App Setup --------------------
 
 app = Quart(__name__)
@@ -426,3 +424,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
