@@ -108,9 +108,6 @@ def stop_node_service():
         logger.info("🛑 Stopping Node.js service...")
         node_process.send_signal(signal.SIGINT)
 
-# Register shutdown handler
-atexit.register(stop_node_service)
-
 async def node_watchdog():
     global node_process, node_retries
     while True:
@@ -131,47 +128,50 @@ async def node_watchdog():
 # ------------------- Item Indexing (SQLite) -------------------
 
 DB_FILE = os.path.join(os.path.dirname(__file__), "item_index.db")
+db_conn = None # Global connection for efficiency
 
-# Load the index from disk, or initialize empty
 async def init_db():
-    async with aiosqlite.connect(DB_FILE) as db:
-        # We use a unique constraint on item_id to prevent duplicates
-        await db.execute("""
-            CREATE TABLE IF NOT EXISTS items (
-                id TEXT PRIMARY KEY,
-                name TEXT,
-                page INTEGER,
-                last_seen TEXT
-            )
-        """)
-        await db.commit()
+    global db_conn
+    db_conn = await aiosqlite.connect(DB_FILE)
+    
+    # ENABLE MULTIPLE READERS: WAL mode allows reading while writing
+    await db_conn.execute("PRAGMA journal_mode=WAL;")
+    # Prevent "Database is locked" errors by waiting up to 5 seconds
+    await db_conn.execute("PRAGMA busy_timeout = 5000;")
+    
+    await db_conn.execute("""
+        CREATE TABLE IF NOT EXISTS items (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            page INTEGER,
+            last_seen TEXT
+        )
+    """)
+    await db_conn.commit()
 
 async def update_index_db(items_with_pages):
-    async with aiosqlite.connect(DB_FILE) as db:
-        data = [
-            (item.get("id"), item.get("name"), page, datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
-            for item, page in items_with_pages
-            if item.get("id")
-        ]
-        # Replace/Update logic
-        await db.executemany("""
-            INSERT OR REPLACE INTO items (id, name, page, last_seen)
-            VALUES (?, ?, ?, ?)
-        """, data)
-        await db.commit()
+    if not items_with_pages: return
+    data = [
+        (item.get("id"), item.get("name"), page, datetime.now(timezone.utc).isoformat())
+        for item, page in items_with_pages if item.get("id")
+    ]
+    # Uses the persistent global connection
+    await db_conn.executemany("""
+        INSERT OR REPLACE INTO items (id, name, page, last_seen)
+        VALUES (?, ?, ?, ?)
+    """, data)
+    await db_conn.commit()
 
 async def get_indexed_page(item_id):
-    async with aiosqlite.connect(DB_FILE) as db:
-        async with db.execute("SELECT page FROM items WHERE id = ?", (item_id,)) as cursor:
-            row = await cursor.fetchone()
-            return row[0] if row else None
+    async with db_conn.execute("SELECT page FROM items WHERE id = ?", (item_id,)) as cursor:
+        row = await cursor.fetchone()
+        return row[0] if row else None
 
 async def remove_missing_from_db(item_ids):
-    if not item_ids:
-        return
-    async with aiosqlite.connect(DB_FILE) as db:
-        await db.execute(f"DELETE FROM items WHERE id IN ({','.join(['?']*len(item_ids))})", item_ids)
-        await db.commit()
+    if not item_ids: return
+    placeholders = ','.join(['?'] * len(item_ids))
+    await db_conn.execute(f"DELETE FROM items WHERE id IN ({placeholders})", item_ids)
+    await db_conn.commit()
 
 # -------------------- Fetch Logic --------------------
 
@@ -306,9 +306,8 @@ async def get_items():
         start_page += CONCURRENT_PAGES
 
     # Remove any index entries that were not found in the fetched pages
-    async with aiosqlite.connect(DB_FILE) as db:
-        async with db.execute("SELECT id FROM items") as cursor:
-            all_indexed_ids = [row[0] for row in await cursor.fetchall()]
+    async with db_conn.execute("SELECT id FROM items") as cursor:
+        all_indexed_ids = [row[0] for row in await cursor.fetchall()]
 
     missing_ids = [id_ for id_ in all_indexed_ids if id_ not in fetched_ids]
     if missing_ids:
@@ -332,13 +331,11 @@ async def get_item():
 
     # Helper: get page from database
     async def get_indexed_page(item_id):
-        async with aiosqlite.connect(DB_FILE) as db:
-            async with db.execute("SELECT page FROM items WHERE id = ?", (item_id,)) as cursor:
-                row = await cursor.fetchone()
-                return row[0] if row else None
-
-    start_page = await get_indexed_page(item_id)
-    async with aiohttp.ClientSession() as session:
+        async with db_conn.execute("SELECT page FROM items WHERE id = ?", (item_id,)) as cursor:
+            row = await cursor.fetchone()
+            return row[0] if row else None
+        start_page = await get_indexed_page(item_id)
+        async with aiohttp.ClientSession() as session:
 
         # Fetch indexed page if exists
         if start_page is not None:
@@ -420,18 +417,27 @@ async def restart_node():
 
 # -------------------- Entry Point --------------------
 
+def stop_all_services():
+    """Ensures everything shuts down gracefully."""
+    global db_conn
+    stop_node_service()
+    if db_conn:
+        # Close the persistent SQLite connection
+        asyncio.get_event_loop().run_until_complete(db_conn.close())
+
+atexit.register(stop_all_services)
+
 async def main():
-    await init_db()
+    await init_db() # Initializes WAL mode and global connection
 
     # 1. Start Node service
     await start_node_service()
     asyncio.create_task(node_watchdog())
 
-    # 2. Start Quart using Hypercorn (async)
+    # 2. Start Quart using Hypercorn
     config = Config()
     config.bind = [BIND]
     await serve(app, config)
 
 if __name__ == "__main__":
     asyncio.run(main())
-
