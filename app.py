@@ -10,6 +10,8 @@ concurrent scraping with preserved browser state.
 
 import asyncio
 import atexit
+from datetime import datetime, timezone
+from functools import wraps
 import json
 import logging
 import os
@@ -18,8 +20,19 @@ import sys
 import aiohttp
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
-from quart import Quart, jsonify, request
+from quart import abort, Quart, jsonify, request
 from quart_cors import cors
+
+# -------------------- Load config --------------------
+CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.json")
+with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+    config_data = json.load(f)
+
+PYTHON_CONFIG = config_data.get("python_service", {})
+BIND = PYTHON_CONFIG.get("bind", "127.0.0.1:5000")
+CONCURRENT_PAGES = PYTHON_CONFIG.get("concurrent_pages", 5)
+MAX_RETRIES = PYTHON_CONFIG.get("max_retries", 3)
+NODE_SERVICE_URL = PYTHON_CONFIG.get("node_service_url", "http://localhost:3001/traderie")
 
 # -------------------- Logging --------------------
 
@@ -29,40 +42,58 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+logging.basicConfig(level=logging.DEBUG)
+
 # -------------------- App Setup --------------------
 
 app = Quart(__name__)
 cors(app)
 
-CONCURRENT_PAGES = 5
+API_KEY = PYTHON_CONFIG.get("api_key")
+
+def require_auth(f):
+    @wraps(f)
+    async def decorated(*args, **kwargs):
+        # Check X-API-Key header
+        auth_header = request.headers.get("X-API-Key")
+        if not auth_header or auth_header != API_KEY:
+            logger.warning(f"Unauthorized access attempt from {request.remote_addr}")
+            abort(401) # Unauthorized
+        return await f(*args, **kwargs)
+    return decorated
 
 # ------------------ Node Service -----------------
-
 NODE_SCRIPT = os.path.join(os.path.dirname(__file__), "fetchData.js")
-NODE_SERVICE_URL = "http://localhost:3001/traderie"
-
 node_process = None
+node_retries = 0
+NODE_MAX_RETRIES = MAX_RETRIES
 
 async def start_node_service():
-    global node_process
-    node_command = ["node", NODE_SCRIPT]
+    global node_process, node_retries
+    
+    # If already running, don't start another
+    if node_process and node_process.returncode is None:
+        return
 
+    node_command = ["node", NODE_SCRIPT]
     node_process = await asyncio.create_subprocess_exec(
         *node_command,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE
     )
 
-    # Wait for NODE_READY line
+    label = "Initial start" if node_retries == 0 else f"Restart attempt {node_retries}"
+    logger.info(f"🟢 Node service started with PID: {node_process.pid} ({label})")
+
+    # Read stdout until we see the ready signal
     while True:
         line = await node_process.stdout.readline()
-        if not line:
-            await asyncio.sleep(0.1)
-            continue
+        if not line: break
         decoded = line.decode().strip()
-        print(f"[Node stdout] {decoded}")
-        if decoded == "NODE_READY":
-            print("✅ Node signaled ready")
+        logger.info(f"[Node stdout] {decoded}")
+        if "NODE_READY" in decoded:
+            logger.info("✅ Node signaled ready")
+            node_retries = 0
             break
 
 def stop_node_service():
@@ -71,11 +102,28 @@ def stop_node_service():
     """
     global node_process
     if node_process and node_process.returncode is None:
-        print("🛑 Stopping Node.js service...")
+        logger.info("🛑 Stopping Node.js service...")
         node_process.send_signal(signal.SIGINT)
 
 # Register shutdown handler
 atexit.register(stop_node_service)
+
+async def node_watchdog():
+    global node_process, node_retries
+    while True:
+        await asyncio.sleep(2)
+        if node_process is not None:
+            ret = node_process.returncode
+            if ret is not None:
+                logger.warning(f"❌ Node process (PID {node_process.pid}) exited with code {ret}")
+                
+                if node_retries < NODE_MAX_RETRIES:
+                    node_retries += 1 
+                    logger.info(f"♻️ Restarting Node (failure {node_retries}/{NODE_MAX_RETRIES})")
+                    await start_node_service() 
+                else:
+                    logger.critical(f"❌ Max consecutive retries ({NODE_MAX_RETRIES}) reached. Node service disabled.")
+                    node_process = None
 
 # ------------------- Item Indexing -------------------
 
@@ -194,6 +242,40 @@ async def fetch_multiple_pages(start_page, count):
 
 # -------------------- Routes --------------------
 
+@app.route("/health", methods=["GET"])
+async def health():
+    node_status = "unknown"
+    status = "ok"
+    current_pid = node_process.pid if node_process else None
+
+    if node_process is None or node_process.returncode is not None:
+        node_status = "down"
+        status = "degraded"
+    else:
+        # Check if Node is actually responding to HTTP
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(NODE_SERVICE_URL.replace("/traderie", "/health"), timeout=2) as resp:
+                    if resp.status == 200:
+                        node_status = "ok"
+                    else:
+                        node_status = "unhealthy"
+                        status = "degraded"
+        except Exception:
+            node_status = "unreachable"
+            status = "degraded"
+
+    return jsonify({
+        "status": status,
+        "node_service": {
+            "status": node_status,
+            "pid": current_pid,
+            "consecutive_failures": node_retries,
+            "max_retries_allowed": NODE_MAX_RETRIES
+        },
+        "timestamp": datetime.now(timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')
+    })
+
 @app.route("/items", methods=["GET"])
 async def get_items():
     all_items = []
@@ -288,15 +370,58 @@ async def get_item():
     else:
         return jsonify({"error": "Item not found"}), 404
 
+@app.route("/node/restart", methods=["POST"])
+@require_auth
+async def restart_node():
+    global node_process, node_retries
+
+    logger.info("Manual restart requested via API.")
+
+    # 1. Stop existing process gracefully
+    if node_process and node_process.returncode is None:
+        node_process.terminate()
+        try:
+            # Give it 5 seconds to die gracefully, then force kill if needed
+            await asyncio.wait_for(node_process.wait(), timeout=5.0)
+        except asyncio.TimeoutError:
+            node_process.kill()
+            await node_process.wait()
+
+    # 2. Reset state
+    node_retries = 0 
+
+    # 3. Restart and WAIT for the signal
+    try:
+        # We call start_node_service directly (it waits for NODE_READY)
+        # Wrap in wait_for to prevent the API from hanging forever if Node fails
+        await asyncio.wait_for(start_node_service(), timeout=15.0)
+        
+        return jsonify({
+            "status": "success",
+            "message": "Node service restarted and ready",
+            "new_pid": node_process.pid if node_process else None
+        }), 200
+
+    except asyncio.TimeoutError:
+        logger.error("Restart timed out: Node service did not signal READY.")
+        return jsonify({
+            "status": "error",
+            "message": "Node service started but timed out waiting for ready signal"
+        }), 504
+    except Exception as e:
+        logger.exception("Failed to restart Node service")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 # -------------------- Entry Point --------------------
 
 async def main():
     # 1. Start Node service
     await start_node_service()
+    asyncio.create_task(node_watchdog())
 
     # 2. Start Quart using Hypercorn (async)
     config = Config()
-    config.bind = ["127.0.0.1:5000"]  # or your port
+    config.bind = [BIND]
     await serve(app, config)
 
 if __name__ == "__main__":

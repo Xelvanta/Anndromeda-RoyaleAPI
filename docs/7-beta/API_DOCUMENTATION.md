@@ -117,3 +117,82 @@ Retrieve a single item by **id**.
 ```
 
 * Returned if no item with the given `id` exists.
+
+---
+
+## **GET /health**
+
+Check the health of the RoyaleAPI and the Node service.
+
+### **Query Parameters**
+
+* None
+
+### **Responses**
+
+**200 OK**
+
+```json
+{
+  "status": "ok",
+  "node_service": {
+    "status": "ok",
+    "pid": 12345,
+    "consecutive_failures": 0,
+    "max_retries_allowed": 5
+  },
+  "timestamp": "2025-12-30T18:00:00Z"
+}
+```
+
+* `status`: overall API status (`ok` or `degraded`)
+* `node_service.status`: health of the Node service (`ok`, `down`, `unhealthy`, `unreachable`)
+* `pid`: current PID of the Node process if running
+* `consecutive_failures`: number of consecutive Node failures
+* `max_retries_allowed`: maximum retries before marking Node as down
+* `timestamp`: UTC timestamp of the check
+
+---
+
+## **POST /node/restart**
+
+Manually restart the Node service. Requires authentication.
+
+### **Headers**
+
+| Header      | Required | Description                 |
+| ----------- | -------- | --------------------------- |
+| X-API-Key   | yes      | The API key for access      |
+
+### **Responses**
+
+**200 OK**
+
+```json
+{
+  "status": "success",
+  "message": "Node service restarted and ready",
+  "new_pid": 12345
+}
+```
+
+**504 Gateway Timeout**
+
+```json
+{
+  "status": "error",
+  "message": "Node service started but timed out waiting for ready signal"
+}
+```
+
+**500 Internal Server Error**
+
+```json
+{
+  "status": "error",
+  "message": "Failed to restart Node service"
+}
+```
+
+* Restart stops the current Node process (if running), resets failure counters, and starts a new process.
+* Returns a timeout if the Node service does not signal readiness within 15 seconds.

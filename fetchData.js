@@ -8,6 +8,8 @@
  * cookies, TLS fingerprints, and behavioral consistency.
  */
 
+const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
@@ -17,6 +19,14 @@ puppeteer.use(StealthPlugin());
 const app = express();
 app.use(express.json());
 
+// -------------------- Load config --------------------
+const configPath = path.join(__dirname, "config.json");
+const rawConfig = fs.readFileSync(configPath, "utf-8");
+const config = JSON.parse(rawConfig);
+const NODE_PORT = config.node_service.port || 3001;
+const MAX_PAGES = config.node_service.max_pages || 5;
+
+// -------------------- Puppeteer setup --------------------
 /**
  * Puppeteer browser instance (single, global)
  * @type {import('puppeteer').Browser}
@@ -29,21 +39,16 @@ let browser;
  */
 const pagePool = [];
 
-/**
- * Maximum concurrent pages allowed.
- * This limits load and reduces bot-detection risk.
- */
-const MAX_PAGES = 5;
-
-/**
- * Initializes the Puppeteer browser and pre-allocates pages.
- */
 async function initBrowser() {
     browser = await puppeteer.launch({
         headless: "new",
         args: [
             "--no-sandbox",
-            "--disable-setuid-sandbox"
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--no-first-run",
+            "--no-zygote"
         ]
     });
 
@@ -84,6 +89,16 @@ async function acquirePage() {
 function releasePage(page) {
     pagePool.push(page);
 }
+
+// -------------------- Health Endpoint --------------------
+app.get("/health", (req, res) => {
+    res.json({
+        status: browser ? "ok" : "starting",
+        pagesAvailable: pagePool.length,
+        maxPages: MAX_PAGES,
+        timestamp: new Date().toISOString()
+    });
+});
 
 /**
  * Fetch Traderie data for a given page number.
@@ -143,8 +158,8 @@ process.on("SIGTERM", shutdown);
  * Service entry point.
  */
 // Immediately listen
-const server = app.listen(3001, () => {
-    console.log("🚀 Puppeteer service listening on port 3001");
+const server = app.listen(NODE_PORT, () => {
+    console.log(`🚀 Puppeteer service listening on port ${NODE_PORT}`);
     process.stdout.write("NODE_READY\n");
 });
 
