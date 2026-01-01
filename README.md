@@ -52,7 +52,7 @@ This API was created to interact with the **Traderie** website, a platform where
 
 ## 🚀 Installation
 
-RoyaleAPI includes a [Dockerfile](Dockerfile) for easy setup. See [deploying_on_render.md](docs/7-beta/deploying_on_render.md) or use the following steps to start the server locally:
+RoyaleAPI includes a [Dockerfile](Dockerfile) for easy setup. See [deploying_on_render.md](docs/7-beta/deploying_on_render.md)/[deploying_on_northflank.md](docs/7-beta/deploying_on_northflank.md) or use the following steps to start the server locally:
 
 ### 1. Clone Repository
 
