@@ -16,6 +16,7 @@ This guide explains how to deploy **Anndromeda RoyaleAPI** on [Render.com](https
 
    * **API_KEY**: If set, the Python service will use this environment variable as the authentication key for `/node/restart`.
      If not set, the service will default to the `api_key` defined in `config.json`.
+   * You do NOT need to set `PORT` as an environment variable as Render automatically adds it and assigns a port for the service. Only do this if you need to override Render's default port.
 
 3. **Deploy**
 
