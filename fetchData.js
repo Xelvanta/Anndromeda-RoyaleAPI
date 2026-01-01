@@ -158,15 +158,15 @@ process.on("SIGTERM", shutdown);
  * Service entry point.
  */
 // Immediately listen
-const server = app.listen(NODE_PORT, () => {
-    console.log(`🚀 Puppeteer service listening on port ${NODE_PORT}`);
-    process.stdout.write("NODE_READY\n");
-});
-
-// Initialize browser asynchronously in background
-initBrowser().catch(err => {
-    console.error("❌ Browser init failed:", err);
-    process.exit(1);
+const server = app.listen(NODE_PORT, "127.0.0.1", async () => {
+    try {
+        await initBrowser();
+        console.log(`🚀 Puppeteer service listening on port ${NODE_PORT}`);
+        process.stdout.write("NODE_READY\n");
+    } catch (err) {
+        console.error("❌ Browser init failed:", err);
+        process.exit(1);
+    }
 });
 
 
