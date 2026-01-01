@@ -31,7 +31,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 3. Install Node.js dependencies
-COPY package.json .
+COPY package.json package-lock.json .
 RUN npm ci
 
 # 4. Tell Puppeteer to download Chrome during build
