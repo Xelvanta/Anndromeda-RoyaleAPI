@@ -49,9 +49,9 @@ scraper_semaphore = asyncio.Semaphore(PYTHON_CONFIG.get("concurrent_pages", 5))
 # Port / Bind Resolution
 PORT = os.environ.get("PORT")
 if PORT:
-    # Render / production
+    # Production
     BIND = f"0.0.0.0:{PORT}"
-    logger.info(f"Using Render-provided PORT={PORT}")
+    logger.info(f"Using 0.0.0.0 with PORT from environment variable: {PORT}")
 else:
     # Local development
     BIND = PYTHON_CONFIG.get("bind", "127.0.0.1:5000")
@@ -458,6 +458,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
