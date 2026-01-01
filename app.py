@@ -24,6 +24,14 @@ from hypercorn.config import Config
 from quart import abort, Quart, jsonify, request
 from quart_cors import cors
 
+# -------------------- Logging --------------------
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
 # -------------------- Load config --------------------
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.json")
 with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -48,14 +56,6 @@ else:
     # Local development
     BIND = PYTHON_CONFIG.get("bind", "127.0.0.1:5000")
     logger.info(f"Using local bind from config.json: {BIND}")
-
-# -------------------- Logging --------------------
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
 
 # -------------------- App Setup --------------------
 
@@ -458,6 +458,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
