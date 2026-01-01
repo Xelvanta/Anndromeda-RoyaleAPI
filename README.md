@@ -3,6 +3,11 @@
 ![License](https://img.shields.io/github/license/Xelvanta/Anndromeda-RoyaleAPI?label=License\&color=orange)
 ![Puppeteer Version](https://img.shields.io/github/package-json/dependency-version/Xelvanta/Anndromeda-RoyaleAPI/puppeteer?label=Puppeteer)
 ![Release](https://img.shields.io/github/v/release/Xelvanta/Anndromeda-RoyaleAPI?include_prereleases\&label=Release\&color=green)
+[![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=000)](#)
+[![Node.js](https://img.shields.io/badge/Node.js-6DA55F?logo=node.js&logoColor=white)](#)
+[![Express.js](https://img.shields.io/badge/Express.js-%23404d59.svg?logo=express&logoColor=%2361DAFB)](#)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](#)
 
 **Anndromeda RoyaleAPI**, also known as Royale High API or RHAPI, is a powerful **Quart + Puppeteer API** designed to fetch the names of items from the popular Roblox game **Royale High** and their associated community values from **Traderie**. The API returns results in **JSON format**, making it easy to integrate and use for various applications or analysis. This API was created to interact with the **Traderie** website, a platform where the Royale High community buys and sells in-game items. With the API, you can easily access the most up-to-date information on item names and their community values, providing the necessary data for further processing or for custom interfaces.
 
