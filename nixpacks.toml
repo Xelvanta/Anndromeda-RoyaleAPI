@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["python313", "nodejs", "google-chrome"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt", "npm ci"]
+
+[start]
+cmd = "python app.py"
