@@ -30,7 +30,6 @@ with open(CONFIG_FILE, "r", encoding="utf-8") as f:
     config_data = json.load(f)
 
 PYTHON_CONFIG = config_data.get("python_service", {})
-BIND = PYTHON_CONFIG.get("bind", "127.0.0.1:5000")
 CONCURRENT_PAGES = PYTHON_CONFIG.get("concurrent_pages", 5)
 MAX_RETRIES = PYTHON_CONFIG.get("max_retries", 3)
 NODE_SERVICE_URL = PYTHON_CONFIG.get("node_service_url", "http://localhost:3001/traderie")
@@ -38,6 +37,17 @@ NODE_SERVICE_URL = PYTHON_CONFIG.get("node_service_url", "http://localhost:3001/
 # Add a Semaphore to limit global concurrent scraping tasks
 # This should match or be slightly lower than MAX_PAGES in your Node config
 scraper_semaphore = asyncio.Semaphore(PYTHON_CONFIG.get("concurrent_pages", 5))
+
+# Port / Bind Resolution
+PORT = os.environ.get("PORT")
+if PORT:
+    # Render / production
+    BIND = f"0.0.0.0:{PORT}"
+    logger.info(f"Using Render-provided PORT={PORT}")
+else:
+    # Local development
+    BIND = PYTHON_CONFIG.get("bind", "127.0.0.1:5000")
+    logger.info(f"Using local bind from config.json: {BIND}")
 
 # -------------------- Logging --------------------
 
@@ -447,5 +457,6 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
