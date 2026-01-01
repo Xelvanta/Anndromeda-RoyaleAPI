@@ -45,6 +45,8 @@
 
 ## 🚀 Installation
 
+RoyaleAPI includes a [Dockerfile](Dockerfile) for easy setup. See [deploying_on_render.md](docs/7-beta/deploying_on_render.md) or use the following steps to start the server locally:
+
 ### 1. Clone Repository
 
 ```bash
@@ -78,6 +80,8 @@ pip install -r requirements.txt
 ```bash
 python app.py
 ```
+
+The default [config.json](config.json) settings bind to 127.0.0.1:5000 (or 0.0.0.0:{PORT} if PORT is in environment variables).
 
 * **Access endpoints:** `/items`, `/item?id=<ID>`, `/health`, or `/node/restart`
 * **Documentation:** See [API_DOCUMENTATION.md](docs/7-beta/API_DOCUMENTATION.md)
