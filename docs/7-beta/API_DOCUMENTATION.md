@@ -1,6 +1,6 @@
 # Anndromeda RoyaleAPI Documentation
 
-Base URL: `http://localhost:5000/`
+Default Base URL: `http://localhost:5000/`
 
 ---
 
