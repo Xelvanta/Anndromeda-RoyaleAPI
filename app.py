@@ -62,7 +62,8 @@ logger = logging.getLogger(__name__)
 app = Quart(__name__)
 cors(app)
 
-API_KEY = PYTHON_CONFIG.get("api_key")
+# Use environment variable if set, otherwise fall back to config.json
+API_KEY = os.getenv("API_KEY") or PYTHON_CONFIG.get("api_key")
 
 def require_auth(f):
     @wraps(f)
@@ -457,6 +458,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
