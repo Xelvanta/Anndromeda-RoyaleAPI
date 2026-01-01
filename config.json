@@ -5,9 +5,10 @@
   },
   "python_service": {
     "api_key": "YOUR_API_KEY",
-    "bind": "127.0.0.1:5000",
+    "bind": "0.0.0.0:5000",
     "concurrent_pages": 5,
     "max_retries": 3,
     "node_service_url": "http://localhost:3001/traderie"
   }
 }
+
