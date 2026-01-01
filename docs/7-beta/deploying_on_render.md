@@ -34,6 +34,7 @@ This guide explains how to deploy **Anndromeda RoyaleAPI** on [Render.com](https
 
 ### **End Notes**
 
+* **Health Checks**: In settings, the `/health` endpoint can be set as the HTTP endpoint path that Render messages periodically to monitor the service.
 * **Memory Considerations**: Each Puppeteer page consumes significant RAM. If using the free Render plan (512 MB), reduce node_service `max_pages` and python_service `concurrent_pages` to avoid out-of-memory crashes.
 * **Authentication**: Any request to `/node/restart` must include the `X-API-Key` header. If no `API_KEY` environment variable is set, the service falls back to the key in `config.json`.
 * **Internal Node Communication**: The Python service communicates with Node.js internally. `/health` will report `ok` only if Node is responding.
