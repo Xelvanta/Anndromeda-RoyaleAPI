@@ -27,7 +27,7 @@ This API was created to interact with the **Traderie** website, a platform where
 
 ## 🧪 Supported Platforms
 
-* **Tested:** Windows 11
+* **Developed on:** Windows 11
 * **Compatible:** Linux, macOS
 * **Requirements:** Python 3.x, Node.js, Google Chrome
 
