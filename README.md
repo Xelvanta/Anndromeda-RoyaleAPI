@@ -52,7 +52,19 @@ This API was created to interact with the **Traderie** website, a platform where
 
 ## 🚀 Installation
 
-RoyaleAPI includes a [Dockerfile](Dockerfile) for easy setup. See [deploying_on_render.md](docs/7-beta/deploying_on_render.md)/[deploying_on_northflank.md](docs/7-beta/deploying_on_northflank.md) or use the following steps to start the server locally:
+Pre-made guides for deploying on a PaaS: [Render](docs/7-beta/deploying_on_render.md) | [Northflank](docs/7-beta/deploying_on_northflank.md)
+
+### Via Docker
+
+You can run RoyaleAPI via Docker using the [Dockerfile](Dockerfile):
+```
+docker build -t royaleapi:v1 .
+docker run -d -p <HOST-PORT>:5000 --name royaleapi-deploy royaleapi:v1
+```
+
+If you wish, uou may also want to create a volume using `docker volume create` to persist the SQLite-generated index files across containers.
+
+OR locally, without Docker, using the following steps:
 
 ### 1. Clone Repository
 
@@ -80,15 +92,14 @@ npm ci
 pip install -r requirements.txt
 ```
 
----
-
-## ▶️ Running the API
+### 5. Run the API
 
 ```bash
 python app.py
 ```
 
-The default [config.json](config.json) settings bind to 127.0.0.1:5000 (or 0.0.0.0:{PORT} if PORT is in environment variables).
+The default [config.json](config.json) settings bind to 127.0.0.1:5000 (or 0.0.0.0:{PORT} if PORT is in environment variables).  
+It is highly advised to set API_KEY as an environment variable; otherwise the one from [config.json](config.json) will be used.
 
 * **Access endpoints:** `/items`, `/item?id=<ID>`, `/health`, or `/node/restart`
 * **Documentation:** See [API_DOCUMENTATION.md](docs/7-beta/API_DOCUMENTATION.md)
