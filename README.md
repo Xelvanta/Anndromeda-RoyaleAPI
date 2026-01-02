@@ -132,6 +132,6 @@ GPL-3.0. See [LICENSE](LICENSE).
 
 ## 📬 Contact
 
-**Anndromeda / Xelvanta Group Systems**
-Email: [Xelvanta@proton.me](mailto:Xelvanta@proton.me)
+**Anndromeda / Xelvanta Group Systems**  
+Email: [Xelvanta@proton.me](mailto:Xelvanta@proton.me)  
 GitHub: [https://github.com/Xelvanta](https://github.com/Xelvanta)
