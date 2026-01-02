@@ -62,7 +62,7 @@ docker build -t royaleapi:v1 .
 docker run -d -p <HOST-PORT>:5000 --name royaleapi-deploy royaleapi:v1
 ```
 
-If you wish, uou may also want to create a volume using `docker volume create` to persist the SQLite-generated index files across containers.
+If you wish, you may also want to create a volume using `docker volume create` to persist the SQLite-generated index files across containers.
 
 OR locally, without Docker, using the following steps:
 
