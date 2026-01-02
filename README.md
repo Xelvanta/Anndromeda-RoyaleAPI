@@ -66,33 +66,35 @@ If you wish, uou may also want to create a volume using `docker volume create` t
 
 OR locally, without Docker, using the following steps:
 
-### 1. Clone Repository
+### Locally (without Docker)
+
+#### 1. Clone Repository
 
 ```bash
 git clone https://github.com/Xelvanta/Anndromeda-RoyaleAPI
 cd Anndromeda-RoyaleAPI
 ```
 
-### 2. Optional: Python Virtual Environment
+#### 2. Optional: Python Virtual Environment
 
 ```powershell
 py -3.13 -m venv venv
 venv\Scripts\activate
 ```
 
-### 3. Install Node Dependencies
+#### 3. Install Node Dependencies
 
 ```bash
 npm ci
 ```
 
-### 4. Install Python Dependencies
+#### 4. Install Python Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 5. Run the API
+#### 5. Run the API
 
 ```bash
 python app.py
