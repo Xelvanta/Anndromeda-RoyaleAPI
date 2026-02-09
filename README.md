@@ -1,5 +1,10 @@
 # 🚀 Anndromeda RoyaleAPI
 
+> [!WARNING]
+> As of **Monday, February 9, 2026 8:11 a.m. UTC**, historical price records are **no longer being automatically tracked by this repository**.  
+> If you have the technial knowledge and hosting infrastructure, please feel free to clone the repository and use your own GitHub token and repository
+> to track the value of items using the `Value Tracker` workflow.
+
 ![License](https://img.shields.io/github/license/Xelvanta/Anndromeda-RoyaleAPI?label=License\&color=orange)
 ![Puppeteer Version](https://img.shields.io/github/package-json/dependency-version/Xelvanta/Anndromeda-RoyaleAPI/puppeteer?label=Puppeteer)
 ![Release](https://img.shields.io/github/v/release/Xelvanta/Anndromeda-RoyaleAPI?include_prereleases\&label=Release\&color=green)
